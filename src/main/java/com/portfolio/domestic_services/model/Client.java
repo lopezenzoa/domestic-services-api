@@ -2,6 +2,7 @@ package com.portfolio.domestic_services.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -11,13 +12,14 @@ import java.util.List;
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
 @Entity
-@Table(name = "users")
+@Table(name = "clients")
 @Inheritance(strategy = InheritanceType.JOINED) // this Inheritance is to extends the attributes to the Consumers and Providers
-public class User {
+public class Client {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "user_id", nullable = false)
+    @Column(name = "client_id", nullable = false)
     private Long id;
 
     @Column(name = "first_name", nullable = false, length = 20)
@@ -43,7 +45,7 @@ public class User {
     private Favorites favorites;
      */
 
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "client")
     @JsonIgnore
     private List<Call> calls;
 

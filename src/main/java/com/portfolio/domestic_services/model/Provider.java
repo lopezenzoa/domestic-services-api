@@ -13,7 +13,12 @@ import java.util.List;
 @NoArgsConstructor
 @Entity
 @Table(name = "providers")
-public class Provider extends User {
+public class Provider extends Client {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "provider_id", nullable = false)
+    private Long id;
+
     @Column(name = "license_number", nullable = false, unique = true)
     private String licenseNumber;
 
