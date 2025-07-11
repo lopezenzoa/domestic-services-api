@@ -12,11 +12,12 @@ import java.util.List;
 @Component
 public class ProviderMapper {
     @Autowired private FacilityMapper facilityMapper;
+    @Autowired private ShiftMapper shiftMapper;
 
     public ProviderDTO toDto(Provider entity) {
         ProviderDTO dto = new ProviderDTO();
 
-        /* Idk why I cannot call a constructor for the superclass of 'ProviderDTO' */
+        /* IDK why I cannot call a constructor for the superclass of 'ProviderDTO' */
         /* Instead I must to manually set all properties for the dto */
 
         dto.setId(entity.getId());
@@ -31,7 +32,7 @@ public class ProviderMapper {
 
         dto.setLicenseNumber(entity.getLicenseNumber());
         dto.setFacility(facilityMapper.toDto(entity.getFacility()));
-        // dto.setShifts(entity.getShifts());
+        dto.setShifts(entity.getShifts() == null ? new ArrayList<>() : shiftMapper.toDtoList(entity.getShifts()));
 
         return dto;
     }
