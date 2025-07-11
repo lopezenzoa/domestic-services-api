@@ -18,9 +18,10 @@ import java.time.LocalDateTime;
 public class Shift {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "shift_id", nullable = false)
     private Long id;
 
-    @Column(name = "date", columnDefinition = "DATETIME", nullable = false, unique = true)
+    @Column(name = "date", columnDefinition = "DATETIME", nullable = false)
     private LocalDateTime dateTime;
 
     @Column(columnDefinition = "TINYINT(1)", nullable = false)
