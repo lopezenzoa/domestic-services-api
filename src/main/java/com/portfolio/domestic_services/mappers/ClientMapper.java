@@ -30,7 +30,7 @@ public class ClientMapper {
         return dtos;
     }
 
-    public Client toEntity(ClientDTO dto, Roles role) {
+    public Client toEntity(ClientDTO dto) {
         return new Client(
                 dto.getId(),
                 dto.getFirstName(),
@@ -41,7 +41,7 @@ public class ClientMapper {
                 null,
                 dto.getUsername(),
                 dto.getPassword(),
-                role
+                Roles.CLIENT
         );
     }
 }

@@ -40,7 +40,7 @@ public class ClientServiceImpl implements ClientService {
 
     @Override
     public Optional<ClientDTO> create(ClientDTO dto) {
-        Client client = mapper.toEntity(dto, Roles.CLIENT);
+        Client client = mapper.toEntity(dto);
         Client saved = repo.save(client);
 
         return Optional.of(mapper.toDto(saved));
@@ -48,7 +48,7 @@ public class ClientServiceImpl implements ClientService {
 
     @Override
     public Optional<ClientDTO> update(ClientDTO newType) {
-        Client updated = repo.save(mapper.toEntity(newType, Roles.CLIENT));
+        Client updated = repo.save(mapper.toEntity(newType));
         return Optional.of(mapper.toDto(updated)); // Spring JPA manages automatically the update
     }
 
