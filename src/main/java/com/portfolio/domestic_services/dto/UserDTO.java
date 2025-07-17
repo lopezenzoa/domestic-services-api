@@ -1,5 +1,6 @@
 package com.portfolio.domestic_services.dto;
 
+import com.portfolio.domestic_services.model.Roles;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -18,4 +19,5 @@ public class UserDTO {
     private String email;
     private String username;
     private String password;
+    private Roles role;
 }

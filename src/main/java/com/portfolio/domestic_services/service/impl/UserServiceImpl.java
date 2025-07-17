@@ -19,9 +19,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Optional<UserDTO> create(UserDTO dto) {
-        User entity = mapper.toEntity(dto);
+        dto.setRole(Roles.USER); // by default, when creating a new User, its default role is USER
 
-        entity.setRole(Roles.USER); // by default, when creating a new User, its default role is USER
+        User entity = mapper.toEntity(dto);
         User saved = repository.save(entity);
 
         return Optional.of(mapper.toDto(saved));
@@ -41,10 +41,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Optional<UserDTO> update(UserDTO dto) {
+        dto.setRole(Roles.USER); // by default, when updating a User, its default role is USER
+
         User entity = mapper.toEntity(dto);
-
-        entity.setRole(Roles.USER); // by default, when updating a User, its default role is USER
-
         User saved = repository.save(entity);
 
         return Optional.of(mapper.toDto(saved));

@@ -25,7 +25,7 @@ public class User {
     @Column(name = "last_name", nullable = false, length = 20)
     private String lastName;
 
-    @Column(nullable = false, unique = true, length = 40)
+    @Column(nullable = false, length = 40)
     private String address;
 
     @Column(name = "phone_number", nullable = false, length = 40, unique = true)
