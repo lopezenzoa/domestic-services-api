@@ -20,7 +20,6 @@ public class ShiftServiceImpl implements ShiftService {
     @Autowired private ShiftRepository repo;
     @Autowired private ShiftMapper mapper;
     @Autowired private ProviderService providerService;
-    @Autowired private ProviderMapper providerMapper;
 
     @Override
     public Optional<ShiftDTO> create(ShiftDTO dto, Long providerId) {
@@ -28,7 +27,7 @@ public class ShiftServiceImpl implements ShiftService {
 
         // searching the provider on db to append the shift
         Optional<ProviderDTO> providerOpt = providerService.getById(providerId);
-        providerOpt.ifPresent(provider -> entity.setProvider(providerMapper.toEntity(provider)));
+        providerOpt.ifPresent(provider -> entity.setProvider(providerService.mapToEntity(provider)));
 
         // validating the date and time of the shift
         boolean isDateUnique = authenticateDate(providerId, LocalDateTime.parse(dto.getDateTime()));
@@ -48,7 +47,7 @@ public class ShiftServiceImpl implements ShiftService {
 
         // searching the provider on db to append the shift
         Optional<ProviderDTO> providerOpt = providerService.getById(providerId);
-        providerOpt.ifPresent(provider -> entity.setProvider(providerMapper.toEntity(provider)));
+        providerOpt.ifPresent(provider -> entity.setProvider(providerService.mapToEntity(provider)));
 
         // validating the date and time of the shift
         boolean isDateUnique = authenticateDate(providerId, LocalDateTime.parse(newDto.getDateTime()));

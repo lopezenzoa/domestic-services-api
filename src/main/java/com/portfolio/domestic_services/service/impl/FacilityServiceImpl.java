@@ -28,4 +28,9 @@ public class FacilityServiceImpl implements FacilityService {
         Optional<Facility> facilityOpt = repo.findByName(name);
         return facilityOpt.map(mapper::toDto);
     }
+
+    @Override
+    public Facility mapToEntity(FacilityDTO dto) {
+        return mapper.toEntity(dto);
+    }
 }
