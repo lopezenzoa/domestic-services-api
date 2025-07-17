@@ -5,6 +5,7 @@ import com.portfolio.domestic_services.dto.ProviderDTO;
 import com.portfolio.domestic_services.mappers.FacilityMapper;
 import com.portfolio.domestic_services.mappers.ProviderMapper;
 import com.portfolio.domestic_services.model.Provider;
+import com.portfolio.domestic_services.model.Roles;
 import com.portfolio.domestic_services.repository.ProviderRepository;
 import com.portfolio.domestic_services.service.FacilityService;
 import com.portfolio.domestic_services.service.ProviderService;
@@ -16,47 +17,50 @@ import java.util.Optional;
 
 @Service
 public class ProviderServiceImpl implements ProviderService {
-    @Autowired private ProviderRepository repo;
+    @Autowired private ProviderRepository repository;
     @Autowired private ProviderMapper mapper;
     @Autowired private FacilityService facilityService;
     @Autowired private FacilityMapper facilityMapper;
 
     @Override
     public Optional<ProviderDTO> create(ProviderDTO dto) {
+        dto.setRole(Roles.USER); // by default, when creating a Provider, its role is USER
         Provider provider = mapper.toEntity(dto);
 
         Optional<FacilityDTO> facilityOpt = facilityService.findByName(dto.getFacility().getName());
 
         // here, if the facility is found, then I have to map it to an entity in order to set it to the provider
         facilityOpt.ifPresent(facilityDto -> provider.setFacility(facilityMapper.toEntity(facilityDto)));
-        Provider saved = repo.save(provider);
+        Provider saved = repository.save(provider);
 
         return Optional.of(mapper.toDto(saved));
     }
 
     @Override
-    public Optional<ProviderDTO> update(ProviderDTO newDto) {
-        Provider updated = repo.save(mapper.toEntity(newDto));
+    public Optional<ProviderDTO> update(ProviderDTO dto) {
+        dto.setRole(Roles.USER); // by default, when updating a Provider, its role is USER
+
+        Provider updated = repository.save(mapper.toEntity(dto));
         return Optional.of(mapper.toDto(updated)); // Spring JPA manages automatically the update
     }
 
     @Override
     public Optional<ProviderDTO> getById(Long id) {
-        Optional<Provider> providerOpt = repo.findById(id);
+        Optional<Provider> providerOpt = repository.findById(id);
         return providerOpt.map(client -> mapper.toDto(client));
     }
 
     @Override
     public List<ProviderDTO> getAll() {
-        return mapper.toDtoList(repo.findAll());
+        return mapper.toDtoList(repository.findAll());
     }
 
     @Override
     public boolean delete(Long id) {
-        if (!repo.existsById(id))
+        if (!repository.existsById(id))
             return false;
 
-        repo.deleteById(id);
+        repository.deleteById(id);
         return true;
     }
 }

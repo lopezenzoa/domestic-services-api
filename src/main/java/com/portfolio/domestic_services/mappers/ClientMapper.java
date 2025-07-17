@@ -1,7 +1,6 @@
 package com.portfolio.domestic_services.mappers;
 
 import com.portfolio.domestic_services.dto.ClientDTO;
-import com.portfolio.domestic_services.model.Roles;
 import com.portfolio.domestic_services.model.Client;
 import org.springframework.stereotype.Component;
 
@@ -11,17 +10,19 @@ import java.util.List;
 @Component
 public class ClientMapper {
     public ClientDTO toDto(Client entity) {
-        return new ClientDTO(
-            entity.getId(),
-            entity.getFirstName(),
-            entity.getLastName(),
-            entity.getAddress(),
-            entity.getPhoneNumber(),
-            entity.getEmail(),
-            null,
-            entity.getUsername(),
-            entity.getPassword()
-        );
+        ClientDTO dto = new ClientDTO();
+
+        dto.setId(entity.getId());
+        dto.setFirstName(entity.getFirstName());
+        dto.setLastName(entity.getLastName());
+        dto.setAddress(entity.getAddress());
+        dto.setPhoneNumber(entity.getPhoneNumber());
+        dto.setEmail(entity.getEmail());
+        dto.setUsername(entity.getUsername());
+        dto.setPassword(entity.getPassword());
+        dto.setRole(entity.getRole());
+
+        return dto;
     }
 
     public List<ClientDTO> toDtoList(List<Client> entities) {
@@ -31,17 +32,18 @@ public class ClientMapper {
     }
 
     public Client toEntity(ClientDTO dto) {
-        return new Client(
-                dto.getId(),
-                dto.getFirstName(),
-                dto.getLastName(),
-                dto.getAddress(),
-                dto.getPhoneNumber(),
-                dto.getEmail(),
-                null,
-                dto.getUsername(),
-                dto.getPassword(),
-                Roles.CLIENT
-        );
+        Client entity = new Client();
+
+        entity.setId(dto.getId());
+        entity.setFirstName(dto.getFirstName());
+        entity.setLastName(dto.getLastName());
+        entity.setAddress(dto.getAddress());
+        entity.setPhoneNumber(dto.getPhoneNumber());
+        entity.setEmail(dto.getEmail());
+        entity.setUsername(dto.getUsername());
+        entity.setPassword(dto.getPassword());
+        entity.setRole(dto.getRole());
+
+        return entity;
     }
 }

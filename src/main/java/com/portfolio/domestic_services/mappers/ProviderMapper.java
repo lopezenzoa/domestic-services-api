@@ -2,7 +2,6 @@ package com.portfolio.domestic_services.mappers;
 
 import com.portfolio.domestic_services.dto.ProviderDTO;
 import com.portfolio.domestic_services.model.Provider;
-import com.portfolio.domestic_services.model.Roles;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -17,18 +16,15 @@ public class ProviderMapper {
     public ProviderDTO toDto(Provider entity) {
         ProviderDTO dto = new ProviderDTO();
 
-        /* IDK why I cannot call a constructor for the superclass of 'ProviderDTO' */
-        /* Instead I must to manually set all properties for the dto */
-
         dto.setId(entity.getId());
         dto.setFirstName(entity.getFirstName());
         dto.setLastName(entity.getLastName());
         dto.setAddress(entity.getAddress());
         dto.setPhoneNumber(entity.getPhoneNumber());
         dto.setEmail(entity.getEmail());
-        // dto.setCalls(entity.getCalls());
         dto.setUsername(entity.getUsername());
         dto.setPassword(entity.getPassword());
+        dto.setRole(entity.getRole());
 
         dto.setLicenseNumber(entity.getLicenseNumber());
         dto.setFacility(facilityMapper.toDto(entity.getFacility()));
@@ -52,16 +48,12 @@ public class ProviderMapper {
         provider.setAddress(dto.getAddress());
         provider.setPhoneNumber(dto.getPhoneNumber());
         provider.setEmail(dto.getEmail());
-        // provider.setReviews(dto.getReviews());
-        // provider.setFavorites(dto.getFavorites());
-        // provider.setCalls(dto.getCalls());
         provider.setUsername(dto.getUsername());
         provider.setPassword(dto.getPassword());
-        provider.setRole(Roles.PROVIDER);
+        provider.setRole(dto.getRole());
 
         provider.setLicenseNumber(dto.getLicenseNumber());
         provider.setFacility(facilityMapper.toEntity(dto.getFacility()));
-        // provider.setShifts(dto.getShifts());
 
         return provider;
 

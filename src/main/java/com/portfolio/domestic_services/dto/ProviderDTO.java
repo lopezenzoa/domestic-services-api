@@ -11,7 +11,8 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ProviderDTO extends ClientDTO {
+public class ProviderDTO extends UserDTO {
+    private Long id;
     private String licenseNumber;
     private FacilityDTO facility;
     private List<ShiftDTO> shifts;

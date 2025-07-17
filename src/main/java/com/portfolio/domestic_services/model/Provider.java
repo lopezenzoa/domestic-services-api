@@ -1,6 +1,5 @@
 package com.portfolio.domestic_services.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -15,7 +14,7 @@ import java.util.List;
 @AllArgsConstructor
 @Entity
 @Table(name = "providers")
-public class Provider extends Client {
+public class Provider extends User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "provider_id", nullable = false)
@@ -29,6 +28,8 @@ public class Provider extends Client {
     private Facility facility;
 
     @OneToMany(mappedBy = "provider")
-    @JsonIgnore
     private List<Shift> shifts;
+
+    @OneToMany(mappedBy = "provider")
+    private List<Call> calls;
 }
