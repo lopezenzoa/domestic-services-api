@@ -2,6 +2,7 @@ package com.portfolio.domestic_services.controller;
 
 import com.portfolio.domestic_services.dto.ProviderDTO;
 import com.portfolio.domestic_services.service.ProviderService;
+import com.portfolio.domestic_services.service.exceptions.UniquenessViolationException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -30,7 +31,7 @@ public class ProviderController {
     public ResponseEntity<ProviderDTO> create(
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Provider data needed to create")
             @RequestBody ProviderDTO body
-    ) {
+    ) throws UniquenessViolationException {
         Optional<ProviderDTO> response = service.create(body);
         return response.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.badRequest().build());
     }
@@ -44,7 +45,7 @@ public class ProviderController {
     public ResponseEntity<ProviderDTO> update(
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Provider data needed to update")
             @RequestBody ProviderDTO body
-    ) {
+    ) throws UniquenessViolationException {
         Optional<ProviderDTO> response = service.create(body);
         return response.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.badRequest().build());
     }

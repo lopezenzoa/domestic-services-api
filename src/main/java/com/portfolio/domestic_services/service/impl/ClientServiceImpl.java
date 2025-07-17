@@ -6,6 +6,8 @@ import com.portfolio.domestic_services.model.Client;
 import com.portfolio.domestic_services.model.Roles;
 import com.portfolio.domestic_services.repository.ClientRepository;
 import com.portfolio.domestic_services.service.ClientService;
+import com.portfolio.domestic_services.service.UserService;
+import com.portfolio.domestic_services.service.exceptions.UniquenessViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,9 +18,12 @@ import java.util.Optional;
 public class ClientServiceImpl implements ClientService {
     @Autowired private ClientRepository repository;
     @Autowired private ClientMapper mapper;
+    @Autowired private UserService userService;
 
     @Override
-    public Optional<ClientDTO> create(ClientDTO dto) {
+    public Optional<ClientDTO> create(ClientDTO dto) throws UniquenessViolationException {
+        userService.checkFieldsUniquenessOnCreate(dto.getEmail(), dto.getPhoneNumber(), dto.getUsername());
+
         dto.setRole(Roles.USER); // by default, when creating a new Client, its role is USER
 
         Client client = mapper.toEntity(dto);
@@ -28,7 +33,9 @@ public class ClientServiceImpl implements ClientService {
     }
 
     @Override
-    public Optional<ClientDTO> update(ClientDTO newType) {
+    public Optional<ClientDTO> update(ClientDTO newType) throws UniquenessViolationException {
+        userService.checkFieldsUniquenessOnUpdate(newType.getId(), newType.getEmail(), newType.getPhoneNumber(), newType.getUsername());
+
         newType.setRole(Roles.USER); // by default, when updating a new Client, its role is USER
 
         Client updated = repository.save(mapper.toEntity(newType));

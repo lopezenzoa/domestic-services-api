@@ -6,6 +6,7 @@ import com.portfolio.domestic_services.model.Roles;
 import com.portfolio.domestic_services.model.User;
 import com.portfolio.domestic_services.repository.UserRepository;
 import com.portfolio.domestic_services.service.UserService;
+import com.portfolio.domestic_services.service.exceptions.UniquenessViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -18,7 +19,9 @@ public class UserServiceImpl implements UserService {
     @Autowired private UserMapper mapper;
 
     @Override
-    public Optional<UserDTO> create(UserDTO dto) {
+    public Optional<UserDTO> create(UserDTO dto) throws UniquenessViolationException {
+        checkFieldsUniquenessOnCreate(dto.getEmail(), dto.getPhoneNumber(), dto.getUsername());
+
         dto.setRole(Roles.USER); // by default, when creating a new User, its default role is USER
 
         User entity = mapper.toEntity(dto);
@@ -40,7 +43,9 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Optional<UserDTO> update(UserDTO dto) {
+    public Optional<UserDTO> update(UserDTO dto) throws UniquenessViolationException {
+        checkFieldsUniquenessOnUpdate(dto.getId(), dto.getEmail(), dto.getPhoneNumber(), dto.getUsername());
+
         dto.setRole(Roles.USER); // by default, when updating a User, its default role is USER
 
         User entity = mapper.toEntity(dto);
@@ -56,5 +61,46 @@ public class UserServiceImpl implements UserService {
 
         repository.deleteById(id);
         return true;
+    }
+
+    @Override
+    public void checkFieldsUniquenessOnCreate(String email, String phoneNumber, String username) throws UniquenessViolationException {
+        boolean existsPhoneNumber = existsByPhoneNumber(phoneNumber);
+        boolean existsEmail = existsByEmail(email);
+        boolean existsUsername = existsByUsername(username);
+
+        if (existsPhoneNumber || existsEmail || existsUsername)
+            throw new UniquenessViolationException("I'm sorry but one of the following fields already exists in the system: email, phone number or username");
+    }
+
+    @Override
+    public void checkFieldsUniquenessOnUpdate(Long userId, String email, String phoneNumber, String username) throws UniquenessViolationException {
+        List<User> filteredUsers = repository.findAll()
+                .stream()
+                .filter(user -> !user.getId().equals(userId))
+                .toList();
+
+        // this property stores whether if there's some field repeated in the table or not
+        boolean anyFieldMatch = filteredUsers.stream()
+                .anyMatch(user ->
+                    user.getPhoneNumber().equals(phoneNumber) ||
+                    user.getEmail().equals(email) ||
+                    user.getUsername().equals(username)
+                );
+
+        if (anyFieldMatch)
+            throw new UniquenessViolationException("I'm sorry but one of the following fields already exists in the system: email, phone number or username");
+    }
+
+    private boolean existsByPhoneNumber(String phoneNumber) {
+        return repository.existsByPhoneNumber(phoneNumber);
+    }
+
+    private boolean existsByEmail(String email) {
+        return repository.existsByEmail(email);
+    }
+
+    private boolean existsByUsername(String username) {
+        return repository.existsByUsername(username);
     }
 }

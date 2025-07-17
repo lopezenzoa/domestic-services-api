@@ -2,13 +2,14 @@ package com.portfolio.domestic_services.service.impl;
 
 import com.portfolio.domestic_services.dto.FacilityDTO;
 import com.portfolio.domestic_services.dto.ProviderDTO;
-import com.portfolio.domestic_services.mappers.FacilityMapper;
 import com.portfolio.domestic_services.mappers.ProviderMapper;
 import com.portfolio.domestic_services.model.Provider;
 import com.portfolio.domestic_services.model.Roles;
 import com.portfolio.domestic_services.repository.ProviderRepository;
 import com.portfolio.domestic_services.service.FacilityService;
 import com.portfolio.domestic_services.service.ProviderService;
+import com.portfolio.domestic_services.service.UserService;
+import com.portfolio.domestic_services.service.exceptions.UniquenessViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,24 +21,28 @@ public class ProviderServiceImpl implements ProviderService {
     @Autowired private ProviderRepository repository;
     @Autowired private ProviderMapper mapper;
     @Autowired private FacilityService facilityService;
-    @Autowired private FacilityMapper facilityMapper;
+    @Autowired private UserService userService;
 
     @Override
-    public Optional<ProviderDTO> create(ProviderDTO dto) {
+    public Optional<ProviderDTO> create(ProviderDTO dto) throws UniquenessViolationException {
+        userService.checkFieldsUniquenessOnCreate(dto.getEmail(), dto.getPhoneNumber(), dto.getUsername());
+
         dto.setRole(Roles.USER); // by default, when creating a Provider, its role is USER
         Provider provider = mapper.toEntity(dto);
 
         Optional<FacilityDTO> facilityOpt = facilityService.findByName(dto.getFacility().getName());
 
         // here, if the facility is found, then I have to map it to an entity in order to set it to the provider
-        facilityOpt.ifPresent(facilityDto -> provider.setFacility(facilityMapper.toEntity(facilityDto)));
+        facilityOpt.ifPresent(facilityDto -> provider.setFacility(facilityService.mapToEntity(facilityDto)));
         Provider saved = repository.save(provider);
 
         return Optional.of(mapper.toDto(saved));
     }
 
     @Override
-    public Optional<ProviderDTO> update(ProviderDTO dto) {
+    public Optional<ProviderDTO> update(ProviderDTO dto) throws UniquenessViolationException {
+        userService.checkFieldsUniquenessOnUpdate(dto.getId(), dto.getEmail(), dto.getPhoneNumber(), dto.getUsername());
+
         dto.setRole(Roles.USER); // by default, when updating a Provider, its role is USER
 
         Provider updated = repository.save(mapper.toEntity(dto));
@@ -62,5 +67,10 @@ public class ProviderServiceImpl implements ProviderService {
 
         repository.deleteById(id);
         return true;
+    }
+
+    @Override
+    public Provider mapToEntity(ProviderDTO dto) {
+        return mapper.toEntity(dto);
     }
 }

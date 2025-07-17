@@ -2,6 +2,7 @@ package com.portfolio.domestic_services.controller;
 
 import com.portfolio.domestic_services.dto.UserDTO;
 import com.portfolio.domestic_services.service.UserService;
+import com.portfolio.domestic_services.service.exceptions.UniquenessViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,7 +16,7 @@ public class UserController {
     @Autowired private UserService service;
 
     @PostMapping("/create")
-    public ResponseEntity<UserDTO> create(@RequestBody UserDTO body) {
+    public ResponseEntity<UserDTO> create(@RequestBody UserDTO body) throws UniquenessViolationException {
         Optional<UserDTO> userOpt = service.create(body);
         return userOpt.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.badRequest().build());
     }
@@ -32,7 +33,7 @@ public class UserController {
     }
 
     @PutMapping("/update")
-    public ResponseEntity<UserDTO> update(@RequestBody UserDTO body) {
+    public ResponseEntity<UserDTO> update(@RequestBody UserDTO body) throws UniquenessViolationException {
         Optional<UserDTO> userOpt = service.update(body);
         return userOpt.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.badRequest().build());
     }

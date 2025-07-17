@@ -2,6 +2,7 @@ package com.portfolio.domestic_services.controller;
 
 import com.portfolio.domestic_services.dto.ClientDTO;
 import com.portfolio.domestic_services.service.ClientService;
+import com.portfolio.domestic_services.service.exceptions.UniquenessViolationException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -31,7 +32,7 @@ public class ClientController {
     public ResponseEntity<ClientDTO> create(
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Client data needed to create")
             @RequestBody ClientDTO body
-    ) {
+    ) throws UniquenessViolationException {
         Optional<ClientDTO> response = service.create(body);
         return response.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.badRequest().build());
     }
@@ -45,8 +46,8 @@ public class ClientController {
     public ResponseEntity<ClientDTO> update(
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Client data needed to update")
             @RequestBody ClientDTO body
-    ) {
-        Optional<ClientDTO> response = service.create(body);
+    ) throws UniquenessViolationException {
+        Optional<ClientDTO> response = service.update(body);
         return response.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.badRequest().build());
     }
 
