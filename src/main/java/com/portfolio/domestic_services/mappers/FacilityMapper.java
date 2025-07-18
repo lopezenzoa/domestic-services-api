@@ -2,7 +2,11 @@ package com.portfolio.domestic_services.mappers;
 
 import com.portfolio.domestic_services.dto.FacilityDTO;
 import com.portfolio.domestic_services.model.Facility;
+import com.portfolio.domestic_services.service.exceptions.EmptyCollectionException;
 import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Component
 public class FacilityMapper {
@@ -12,6 +16,13 @@ public class FacilityMapper {
                 entity.getName(),
                 entity.getDescription()
         );
+    }
+
+    public List<FacilityDTO> toDtoList(List<Facility> entities) {
+        List<FacilityDTO> dtos = new ArrayList<>();
+        entities.forEach(entity -> dtos.add(toDto(entity)));
+        
+        return dtos;
     }
 
     public Facility toEntity(FacilityDTO dto) {

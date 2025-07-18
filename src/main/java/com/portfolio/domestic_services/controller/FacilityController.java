@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -33,6 +34,11 @@ public class FacilityController {
     ) {
         Optional<FacilityDTO> response = service.create(body);
         return response.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.badRequest().build());
+    }
+
+    @GetMapping("/")
+    public ResponseEntity<List<FacilityDTO>> getAll() {
+        return ResponseEntity.ok(service.getAll());
     }
 
     @Operation(
