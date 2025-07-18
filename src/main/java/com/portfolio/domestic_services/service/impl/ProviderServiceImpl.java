@@ -9,6 +9,7 @@ import com.portfolio.domestic_services.repository.ProviderRepository;
 import com.portfolio.domestic_services.service.FacilityService;
 import com.portfolio.domestic_services.service.ProviderService;
 import com.portfolio.domestic_services.service.UserService;
+import com.portfolio.domestic_services.service.exceptions.ResourceNotFoundException;
 import com.portfolio.domestic_services.service.exceptions.UniquenessViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -52,6 +53,10 @@ public class ProviderServiceImpl implements ProviderService {
     @Override
     public Optional<ProviderDTO> getById(Long id) {
         Optional<Provider> providerOpt = repository.findById(id);
+
+        if (providerOpt.isEmpty())
+            throw new ResourceNotFoundException("I'm sorry, but the provider with ID: " + id + " was not found");
+
         return providerOpt.map(client -> mapper.toDto(client));
     }
 
@@ -63,7 +68,7 @@ public class ProviderServiceImpl implements ProviderService {
     @Override
     public boolean delete(Long id) {
         if (!repository.existsById(id))
-            return false;
+            throw new ResourceNotFoundException("I'm sorry, but the provider with ID: " + id + " was not found");
 
         repository.deleteById(id);
         return true;

@@ -6,6 +6,7 @@ import com.portfolio.domestic_services.model.Roles;
 import com.portfolio.domestic_services.model.User;
 import com.portfolio.domestic_services.repository.UserRepository;
 import com.portfolio.domestic_services.service.UserService;
+import com.portfolio.domestic_services.service.exceptions.ResourceNotFoundException;
 import com.portfolio.domestic_services.service.exceptions.UniquenessViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -33,7 +34,11 @@ public class UserServiceImpl implements UserService {
     @Override
     public Optional<UserDTO> getById(Long id) {
         Optional<User> userOpt = repository.findById(id);
-        return userOpt.map(user -> mapper.toDto(user));
+
+        if (userOpt.isEmpty())
+            throw new ResourceNotFoundException("I'm sorry, but the user with ID: " + id + " was not found");
+
+        return Optional.of(mapper.toDto(userOpt.get()));
     }
 
     @Override
@@ -57,7 +62,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public boolean delete(Long id) {
         if (!repository.existsById(id))
-            return false;
+            throw new ResourceNotFoundException("I'm sorry, but the user with ID: " + id + " was not found");
 
         repository.deleteById(id);
         return true;

@@ -5,32 +5,53 @@ import com.portfolio.domestic_services.mappers.FacilityMapper;
 import com.portfolio.domestic_services.model.Facility;
 import com.portfolio.domestic_services.repository.FacilityRepository;
 import com.portfolio.domestic_services.service.FacilityService;
+import com.portfolio.domestic_services.service.exceptions.ResourceNotFoundException;
+import com.portfolio.domestic_services.service.exceptions.UniquenessViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
 public class FacilityServiceImpl implements FacilityService {
-    @Autowired private FacilityRepository repo;
+    @Autowired private FacilityRepository repository;
     @Autowired private FacilityMapper mapper;
 
     @Override
     public Optional<FacilityDTO> create(FacilityDTO dto) {
+        checkUniquenessOnCreate(dto.getName());
+
         Facility facility = mapper.toEntity(dto);
-        Facility saved = repo.save(facility);
+        Facility saved = repository.save(facility);
 
         return Optional.of(mapper.toDto(saved));
     }
 
     @Override
+    public List<FacilityDTO> getAll() {
+        return mapper.toDtoList(repository.findAll());
+    }
+
+    @Override
     public Optional<FacilityDTO> findByName(String name) {
-        Optional<Facility> facilityOpt = repo.findByName(name);
+        Optional<Facility> facilityOpt = repository.findByName(name);
+
+        if (facilityOpt.isEmpty())
+            throw new ResourceNotFoundException("I'm sorry but the facility with name: " + name + " was not found");
+
         return facilityOpt.map(mapper::toDto);
     }
 
     @Override
     public Facility mapToEntity(FacilityDTO dto) {
         return mapper.toEntity(dto);
+    }
+
+    private void checkUniquenessOnCreate(String name) {
+        boolean exists = repository.existsByName(name);
+
+        if (exists)
+            throw new UniquenessViolationException("I'm sorry but there's already another facility with the name: " + name);
     }
 }

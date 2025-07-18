@@ -9,6 +9,7 @@ import com.portfolio.domestic_services.repository.ReviewRepository;
 import com.portfolio.domestic_services.service.ClientService;
 import com.portfolio.domestic_services.service.ProviderService;
 import com.portfolio.domestic_services.service.ReviewService;
+import com.portfolio.domestic_services.service.exceptions.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -18,7 +19,7 @@ import java.util.Optional;
 
 @Service
 public class ReviewServiceImpl implements ReviewService {
-    @Autowired private ReviewRepository repo;
+    @Autowired private ReviewRepository repository;
     @Autowired private ReviewMapper mapper;
     @Autowired private ProviderService providerService;
     @Autowired private ClientService clientService;
@@ -40,32 +41,34 @@ public class ReviewServiceImpl implements ReviewService {
         dto.setCreationDate(LocalDateTime.now().toString());
 
         Review review = mapper.toEntity(dto);
-        Review saved = repo.save(review);
+        Review saved = repository.save(review);
 
         return Optional.of(mapper.toDto(saved));
     }
 
     @Override
     public List<ReviewDTO> getAll() {
-        return mapper.toDtoList(repo.findAll());
+        return mapper.toDtoList(repository.findAll());
     }
 
     @Override
     public List<ReviewDTO> getAllByClient(Long clientId) {
-        return mapper.toDtoList(repo.findAllByClientId(clientId));
+        clientService.getById(clientId);
+        return mapper.toDtoList(repository.findAllByClientId(clientId));
     }
 
     @Override
     public List<ReviewDTO> getAllByProvider(Long providerId) {
-        return mapper.toDtoList(repo.findAllByProviderId(providerId));
+        providerService.getById(providerId);
+        return mapper.toDtoList(repository.findAllByProviderId(providerId));
     }
 
     @Override
     public boolean delete(Long id) {
-        if (!repo.existsById(id))
-            return false;
+        if (!repository.existsById(id))
+            throw new ResourceNotFoundException("I'm sorry, but the review with ID: " + id + " was not found");
 
-        repo.deleteById(id);
+        repository.deleteById(id);
         return true;
     }
 }

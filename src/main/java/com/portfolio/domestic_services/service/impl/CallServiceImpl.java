@@ -10,6 +10,8 @@ import com.portfolio.domestic_services.repository.CallRepository;
 import com.portfolio.domestic_services.service.CallService;
 import com.portfolio.domestic_services.service.ClientService;
 import com.portfolio.domestic_services.service.ProviderService;
+import com.portfolio.domestic_services.service.exceptions.EmptyCollectionException;
+import com.portfolio.domestic_services.service.exceptions.ResourceNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,7 +22,7 @@ import java.util.Optional;
 @Slf4j
 @Service
 public class CallServiceImpl implements CallService {
-    @Autowired private CallRepository repo;
+    @Autowired private CallRepository repository;
     @Autowired private CallMapper mapper;
     @Autowired private ProviderService providerService;
     @Autowired private ClientService clientService;
@@ -35,95 +37,98 @@ public class CallServiceImpl implements CallService {
 
         // checking the presence of both client and provider
         if (clientOpt.isEmpty() || providerOpt.isEmpty())
-            return Optional.empty();
+            return Optional.empty(); // btw, this is unneeded because the method of getById() throw a exception
 
         dto.setState(States.REQUESTING.toString());
         dto.setClient(clientOpt.get());
         dto.setProvider(providerOpt.get());
 
         Call call = mapper.toEntity(dto);
-        Call saved = repo.save(call);
+        Call saved = repository.save(call);
 
         return Optional.of(mapper.toDto(saved));
     }
 
     @Override
     public List<CallDTO> getAll() {
-        List<Call> calls = repo.findAll();
+        List<Call> calls = repository.findAll();
         return mapper.toDtoList(calls);
     }
 
     @Override
     public List<CallDTO> getAllByClient(Long id) {
-        List<Call> calls = repo.findAllByClientId(id);
+        clientService.getById(id); // just checking if the id given is correct
+
+        List<Call> calls = repository.findAllByClientId(id);
         return mapper.toDtoList(calls);
     }
 
     @Override
     public List<CallDTO> getAllByProvider(Long id) {
-        List<Call> calls = repo.findAllByProviderId(id);
+        providerService.getById(id); // just checking if the id given is correct
+
+        List<Call> calls = repository.findAllByProviderId(id);
         return mapper.toDtoList(calls);
     }
 
     @Override
     public List<CallDTO> getAllRequestedByProvider(Long id) {
-        List<Call> calls = repo.findAllByStateAndProviderId(States.REQUESTING, id);
+        providerService.getById(id); // just checking if the id given is correct
+
+        List<Call> calls = repository.findAllByStateAndProviderId(States.REQUESTING, id);
         return mapper.toDtoList(calls);
     }
 
     @Override
     public boolean accept(Long providerId, Long callId) {
-        // getting the provider's calls
-        List<CallDTO> providerCalls = getAllByProvider(providerId)
-                .stream()
-                .filter(call -> call.getState().equals(States.REQUESTING.toString()) && call.getId().equals(callId)) // filtering all calls with state of 'REQUESTING'
-                .toList();
+        List<CallDTO> providerCalls = getAllRequestedByProvider(providerId);
 
         Optional<Call> callOpt = getById(callId);
 
         // this condition means: if the provider has no calls associated or the call was not found, return false
         if (providerCalls.isEmpty() || callOpt.isEmpty())
-            return false;
+            throw new EmptyCollectionException("The provider hasn't any requested call to decline");
 
         Call call = callOpt.get(); // this is the call before updated
         call.setState(States.PENDING); // this means that the call was accepted
 
-        repo.save(call); // updating the call on db
+        repository.save(call); // updating the call on db
         return true;
     }
 
     @Override
     public boolean decline(Long providerId, Long callId) {
-        // getting the provider's calls
-        List<CallDTO> providerCalls = getAllByProvider(providerId)
-                .stream()
-                .filter(call -> call.getState().equals(States.REQUESTING.toString()) && call.getId().equals(callId)) // filtering all calls with state of 'REQUESTING'
-                .toList();
+        List<CallDTO> providerCalls = getAllRequestedByProvider(providerId);
 
         // searching the call
         Optional<Call> callOpt = getById(callId);
 
         // this condition means: if the provider has no calls associated or the call was not found, return false
         if (providerCalls.isEmpty() || callOpt.isEmpty())
-            return false;
+            throw new EmptyCollectionException("The provider hasn't any requested call to decline");
 
         Call call = callOpt.get(); // this is the call before updated
         call.setState(States.DECLINED); // this means that the call was declined
 
-        repo.save(call); // updating the call on db
+        repository.save(call); // updating the call on db
         return true;
     }
 
     @Override
     public boolean delete(Long id) {
-        if (!repo.existsById(id))
-            return false;
+        if (!repository.existsById(id))
+            throw new ResourceNotFoundException("I'm sorry, but the call with ID: " + id + " was not found");
 
-        repo.deleteById(id);
+        repository.deleteById(id);
         return true;
     }
 
     private Optional<Call> getById(Long id) {
-        return repo.findById(id);
+        Optional<Call> callOpt = repository.findById(id);
+
+        if (callOpt.isEmpty())
+            throw new ResourceNotFoundException("I'm sorry, but the call with ID: " + id + " was not found");
+
+        return callOpt;
     }
 }

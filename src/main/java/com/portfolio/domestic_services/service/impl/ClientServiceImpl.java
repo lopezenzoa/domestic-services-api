@@ -7,6 +7,7 @@ import com.portfolio.domestic_services.model.Roles;
 import com.portfolio.domestic_services.repository.ClientRepository;
 import com.portfolio.domestic_services.service.ClientService;
 import com.portfolio.domestic_services.service.UserService;
+import com.portfolio.domestic_services.service.exceptions.ResourceNotFoundException;
 import com.portfolio.domestic_services.service.exceptions.UniquenessViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -45,7 +46,11 @@ public class ClientServiceImpl implements ClientService {
     @Override
     public Optional<ClientDTO> getById(Long id) {
         Optional<Client> clientOpt = repository.findById(id);
-        return clientOpt.map(client -> mapper.toDto(client));
+
+        if (clientOpt.isEmpty())
+            throw new ResourceNotFoundException("I'm sorry, but the client with ID: " + id + " was not found");
+
+        return Optional.of(mapper.toDto(clientOpt.get()));
     }
 
     @Override
@@ -56,7 +61,7 @@ public class ClientServiceImpl implements ClientService {
     @Override
     public boolean delete(Long id) {
         if (!repository.existsById(id))
-            return false;
+            throw new ResourceNotFoundException("I'm sorry, but the client with ID: " + id + " was not found");
 
         repository.deleteById(id);
         return true;
