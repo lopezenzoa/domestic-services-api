@@ -20,10 +20,10 @@ public class Client extends User {
     @Column(name = "client_id", nullable = false)
     private Long id;
 
-    @OneToMany(mappedBy = "client")
+    @OneToMany(mappedBy = "client", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Call> calls;
 
-    @OneToMany(mappedBy = "client")
+    @OneToMany(mappedBy = "client", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Review> reviews;
 
     /*
