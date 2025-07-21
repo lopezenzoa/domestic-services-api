@@ -30,7 +30,7 @@ public class Call {
     private String address;
 
     @Enumerated(EnumType.STRING)
-    @Column(length = 20, nullable = false)
+    @Column(nullable = false)
     private States state;
 
     @ManyToOne
