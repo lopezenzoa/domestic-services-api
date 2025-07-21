@@ -30,7 +30,7 @@ public class ShiftServiceImpl implements ShiftService {
         providerOpt.ifPresent(provider -> entity.setProvider(providerService.mapToEntity(provider)));
 
         // validating the date and time of the shift
-        boolean isDateUnique = authenticateDate(providerId, LocalDateTime.parse(dto.getDateTime()));
+        boolean isDateUnique = authenticateDateOnCreate(providerId, LocalDateTime.parse(dto.getDateTime()));
 
         // the date and time is not unique, so I abort the operation
         if (!isDateUnique)
@@ -50,7 +50,7 @@ public class ShiftServiceImpl implements ShiftService {
         providerOpt.ifPresent(provider -> entity.setProvider(providerService.mapToEntity(provider)));
 
         // validating the date and time of the shift
-        boolean isDateUnique = authenticateDate(providerId, LocalDateTime.parse(newDto.getDateTime()));
+        boolean isDateUnique = authenticateDateOnUpdate(providerId, LocalDateTime.parse(newDto.getDateTime()), newDto.getId());
 
         // validating that the shift is already associated with the provider
         Optional<Shift> shiftOpt = repository.findByIdAndProviderId(entity.getId(), providerId);
@@ -94,8 +94,53 @@ public class ShiftServiceImpl implements ShiftService {
     }
 
     // this method is to validate the date and time uniqueness for the provider's shift
-    private boolean authenticateDate(Long providerId, LocalDateTime dateTime) {
+    private boolean authenticateDateOnCreate(Long providerId, LocalDateTime dateTime) {
         List<Shift> shifts = repository.findAllByAvailableTrueAndDateTimeAndProviderId(dateTime, providerId);
         return shifts.isEmpty();
+    }
+
+    // see I need an extra parameter for this method because it must be excluded the Shift I want to update from the filtering
+    private boolean authenticateDateOnUpdate(Long providerId, LocalDateTime dateTime, Long shiftId) {
+        List<Shift> shifts = repository.findAllByAvailableTrueAndDateTimeAndProviderId(dateTime, providerId);
+
+        // excluding the Shift that I want to update to search another Shift with the same date
+        // (I guess there's a simpler way of doing this, maybe with query methods)
+        List<Shift> filteredShifts = shifts.stream()
+                .filter(shift -> !shift.getId().equals(shiftId))
+                .toList();
+
+        return filteredShifts.isEmpty();
+    }
+
+    // this method is intentioned to be a matcher between Provider's shifts and the requested date
+    // btw, it's supposed that the Client already listed the available shifts of the Provider before doing the request for call
+    @Override
+    public boolean checkRequestedDate(String dtoDate, Long providerId) {
+        List<ShiftDTO> availableShifts = getAvailableByProviderId(providerId);
+
+        // the Provider has no available shifts
+        if (availableShifts.isEmpty())
+            return false;
+
+        return availableShifts.stream()
+                .anyMatch(shift -> shift.getDateTime().equals(dtoDate));
+    }
+
+    // this method assumes the Shift is present in the Provider's list of shifts and it's available
+    @Override
+    public void takeShiftOfProvider(Long providerId, LocalDateTime shiftDate) {
+        List<ShiftDTO> providerShifts = getAllByProviderId(providerId);
+
+        String shiftDateString = shiftDate.toString();
+
+        ShiftDTO filteredShift = providerShifts.stream()
+                .filter(shift -> shift.getDateTime().equals(shiftDateString)) // filtering all with the same date
+                .filter(ShiftDTO::getAvailable) // filtering all available
+                .toList()
+                .getFirst(); // after filtering, the list of shifts would reduce to one element
+
+        filteredShift.setAvailable(false); // taking the shift
+
+        update(filteredShift, providerId);
     }
 }

@@ -52,6 +52,19 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(DateNotAllowedException.class)
+    public ResponseEntity<ErrorResponse> handleDateNotAllowed(DateNotAllowedException exception, HttpServletRequest request) {
+        ErrorResponse error = new ErrorResponse();
+
+        error.setTimestamp(LocalDateTime.now());
+        error.setStatus(HttpStatus.BAD_REQUEST.value());
+        error.setError("Bad Request");
+        error.setMessage(exception.getMessage());
+        error.setPath(request.getRequestURI());
+
+        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+    }
+
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<ErrorResponse> handleGeneralException(RuntimeException exception, HttpServletRequest request) {
         ErrorResponse error = new ErrorResponse();

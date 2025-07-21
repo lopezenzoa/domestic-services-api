@@ -3,6 +3,7 @@ package com.portfolio.domestic_services.service.impl;
 import com.portfolio.domestic_services.dto.CallDTO;
 import com.portfolio.domestic_services.dto.ClientDTO;
 import com.portfolio.domestic_services.dto.ProviderDTO;
+import com.portfolio.domestic_services.dto.ShiftDTO;
 import com.portfolio.domestic_services.mappers.CallMapper;
 import com.portfolio.domestic_services.model.Call;
 import com.portfolio.domestic_services.model.States;
@@ -10,8 +11,10 @@ import com.portfolio.domestic_services.repository.CallRepository;
 import com.portfolio.domestic_services.service.CallService;
 import com.portfolio.domestic_services.service.ClientService;
 import com.portfolio.domestic_services.service.ProviderService;
+import com.portfolio.domestic_services.service.ShiftService;
 import com.portfolio.domestic_services.service.exceptions.EmptyCollectionException;
 import com.portfolio.domestic_services.service.exceptions.ResourceNotFoundException;
+import com.portfolio.domestic_services.service.exceptions.DateNotAllowedException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -26,6 +29,7 @@ public class CallServiceImpl implements CallService {
     @Autowired private CallMapper mapper;
     @Autowired private ProviderService providerService;
     @Autowired private ClientService clientService;
+    @Autowired private ShiftService shiftService;
 
     @Override
     public Optional<CallDTO> request(CallDTO dto) {
@@ -38,6 +42,12 @@ public class CallServiceImpl implements CallService {
         // checking the presence of both client and provider
         if (clientOpt.isEmpty() || providerOpt.isEmpty())
             return Optional.empty(); // btw, this is unneeded because the method of getById() throw a exception
+
+        // checking that the requested dto is an available Shift of the Provider
+        boolean isShiftAvailable = shiftService.checkRequestedDate(dto.getDate(), providerOpt.get().getId());
+
+        if (!isShiftAvailable)
+            throw new DateNotAllowedException("I'm sorry but the date you requested doesn't correspond to an available Shift of the Provider");
 
         dto.setState(States.REQUESTING.toString());
         dto.setClient(clientOpt.get());
@@ -87,7 +97,10 @@ public class CallServiceImpl implements CallService {
 
         // this condition means: if the provider has no calls associated or the call was not found, return false
         if (providerCalls.isEmpty() || callOpt.isEmpty())
-            throw new EmptyCollectionException("The provider hasn't any requested call to decline");
+            throw new EmptyCollectionException("The provider hasn't any requested call to accept");
+
+        // updating the Shift of the Provider to do it unavailable for other calls
+        shiftService.takeShiftOfProvider(providerId, callOpt.get().getDate());
 
         Call call = callOpt.get(); // this is the call before updated
         call.setState(States.PENDING); // this means that the call was accepted
