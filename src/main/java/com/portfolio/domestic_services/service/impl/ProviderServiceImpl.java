@@ -12,6 +12,7 @@ import com.portfolio.domestic_services.service.UserService;
 import com.portfolio.domestic_services.service.exceptions.ResourceNotFoundException;
 import com.portfolio.domestic_services.service.exceptions.UniquenessViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -23,12 +24,15 @@ public class ProviderServiceImpl implements ProviderService {
     @Autowired private ProviderMapper mapper;
     @Autowired private FacilityService facilityService;
     @Autowired private UserService userService;
+    @Autowired private PasswordEncoder passwordEncoder;
 
     @Override
     public Optional<ProviderDTO> create(ProviderDTO dto) throws UniquenessViolationException {
         userService.checkFieldsUniquenessOnCreate(dto.getEmail(), dto.getPhoneNumber(), dto.getUsername());
 
-        dto.setRole(Roles.USER); // by default, when creating a Provider, its role is USER
+        dto.setRole(Roles.PROVIDER); // by default, when creating a Provider, its role is PROVIDER
+        dto.setPassword(passwordEncoder.encode(dto.getPassword()));
+
         Provider provider = mapper.toEntity(dto);
 
         Optional<FacilityDTO> facilityOpt = facilityService.findByName(dto.getFacility().getName());
@@ -44,7 +48,7 @@ public class ProviderServiceImpl implements ProviderService {
     public Optional<ProviderDTO> update(ProviderDTO dto) throws UniquenessViolationException {
         userService.checkFieldsUniquenessOnUpdate(dto.getId(), dto.getEmail(), dto.getPhoneNumber(), dto.getUsername());
 
-        dto.setRole(Roles.USER); // by default, when updating a Provider, its role is USER
+        dto.setRole(Roles.PROVIDER); // by default, when updating a Provider, its role is PROVIDER
 
         Provider updated = repository.save(mapper.toEntity(dto));
         return Optional.of(mapper.toDto(updated)); // Spring JPA manages automatically the update
