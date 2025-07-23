@@ -9,6 +9,7 @@ import com.portfolio.domestic_services.service.UserService;
 import com.portfolio.domestic_services.service.exceptions.ResourceNotFoundException;
 import com.portfolio.domestic_services.service.exceptions.UniquenessViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,12 +19,14 @@ import java.util.Optional;
 public class UserServiceImpl implements UserService {
     @Autowired private UserRepository repository;
     @Autowired private UserMapper mapper;
+    @Autowired private PasswordEncoder passwordEncoder;
 
     @Override
     public Optional<UserDTO> create(UserDTO dto) throws UniquenessViolationException {
         checkFieldsUniquenessOnCreate(dto.getEmail(), dto.getPhoneNumber(), dto.getUsername());
 
         dto.setRole(Roles.USER); // by default, when creating a new User, its default role is USER
+        dto.setPassword(passwordEncoder.encode(dto.getPassword()));
 
         User entity = mapper.toEntity(dto);
         User saved = repository.save(entity);
