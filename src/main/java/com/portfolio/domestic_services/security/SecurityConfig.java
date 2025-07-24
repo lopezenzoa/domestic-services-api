@@ -30,14 +30,18 @@ public class SecurityConfig {
 
                         // Users endpoints
                         .requestMatchers("/api/users/**").hasRole("ADMIN")
+                        .requestMatchers("/api/users/me").hasAnyRole("ADMIN", "PROVIDER", "CLIENT")
 
                         // Calls endpoints
+                        .requestMatchers("/api/calls/me").hasAnyRole("CLIENT", "PROVIDER")
+
                         .requestMatchers(HttpMethod.POST, "/api/calls/**").hasRole("CLIENT")
                         .requestMatchers(HttpMethod.GET,"/api/calls/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE,"/api/calls/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/calls/**").hasRole("PROVIDER")
 
                         // Clients endpoints
+                        .requestMatchers("/api/clients/me").hasAnyRole("CLIENT")
                         .requestMatchers("/api/clients/**").hasRole("ADMIN")
 
                         // Facilities endpoints
@@ -45,23 +49,32 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/facilities/**").hasRole("ADMIN")
 
                         // Flags endpoints
+                        .requestMatchers("/api/flags/me").hasAnyRole("PROVIDER", "CLIENT")
+
                         .requestMatchers(HttpMethod.GET, "/api/flags/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/flags/**").hasRole("CLIENT")
                         .requestMatchers(HttpMethod.DELETE, "/api/flags/**").hasAnyRole("ADMIN", "CLIENT")
 
                         // Providers endpoints
+                        .requestMatchers("/api/providers/me").hasAnyRole("PROVIDER")
+
                         .requestMatchers(HttpMethod.GET,"/api/providers/**").authenticated()
                         .requestMatchers("/api/providers/**").hasRole("ADMIN")
 
                         // Reviews endpoints
+                        .requestMatchers("/api/reviews/all").authenticated()
+                        .requestMatchers("/api/reviews/me").hasAnyRole("PROVIDER", "CLIENT")
+
                         .requestMatchers(HttpMethod.GET, "/api/reviews/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/reviews/**").hasRole("CLIENT")
                         .requestMatchers(HttpMethod.DELETE, "/api/reviews/**").hasAnyRole("ADMIN", "CLIENT")
 
                         // Shifts endpoints
-                        .requestMatchers(HttpMethod.POST, "/api/shifts/**").hasAnyRole("PROVIDER")
+                        .requestMatchers("/api/shifts/me").hasRole("PROVIDER")
+
+                        .requestMatchers(HttpMethod.POST, "/api/shifts/**").hasRole("PROVIDER")
                         .requestMatchers(HttpMethod.GET, "/api/shifts/**").authenticated()
-                        .requestMatchers(HttpMethod.PUT, "/api/shifts/**").hasAnyRole("PROVIDER")
+                        .requestMatchers(HttpMethod.PUT, "/api/shifts/**").hasRole("PROVIDER")
                         .requestMatchers(HttpMethod.DELETE, "/api/shifts/**").hasAnyRole("ADMIN", "PROVIDER")
 
                         .anyRequest().authenticated()
