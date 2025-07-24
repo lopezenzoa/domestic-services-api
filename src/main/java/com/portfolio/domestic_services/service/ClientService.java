@@ -12,4 +12,6 @@ public interface ClientService {
     Optional<ClientDTO> getById(Long id);
     List<ClientDTO> getAll();
     boolean delete(Long id);
+
+    Optional<ClientDTO> getMe();
 }

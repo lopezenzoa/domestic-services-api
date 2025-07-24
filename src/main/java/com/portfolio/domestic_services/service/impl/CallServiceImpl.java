@@ -1,17 +1,12 @@
 package com.portfolio.domestic_services.service.impl;
 
-import com.portfolio.domestic_services.dto.CallDTO;
-import com.portfolio.domestic_services.dto.ClientDTO;
-import com.portfolio.domestic_services.dto.ProviderDTO;
-import com.portfolio.domestic_services.dto.ShiftDTO;
+import com.portfolio.domestic_services.dto.*;
 import com.portfolio.domestic_services.mappers.CallMapper;
 import com.portfolio.domestic_services.model.Call;
+import com.portfolio.domestic_services.model.Roles;
 import com.portfolio.domestic_services.model.States;
 import com.portfolio.domestic_services.repository.CallRepository;
-import com.portfolio.domestic_services.service.CallService;
-import com.portfolio.domestic_services.service.ClientService;
-import com.portfolio.domestic_services.service.ProviderService;
-import com.portfolio.domestic_services.service.ShiftService;
+import com.portfolio.domestic_services.service.*;
 import com.portfolio.domestic_services.service.exceptions.EmptyCollectionException;
 import com.portfolio.domestic_services.service.exceptions.ResourceNotFoundException;
 import com.portfolio.domestic_services.service.exceptions.DateNotAllowedException;
@@ -30,6 +25,7 @@ public class CallServiceImpl implements CallService {
     @Autowired private ProviderService providerService;
     @Autowired private ClientService clientService;
     @Autowired private ShiftService shiftService;
+    @Autowired private UserService userService;
 
     @Override
     public Optional<CallDTO> request(CallDTO dto) {
@@ -134,6 +130,19 @@ public class CallServiceImpl implements CallService {
 
         repository.deleteById(id);
         return true;
+    }
+
+    @Override
+    public List<CallDTO> getMe() {
+        Optional<UserDTO> userOpt = userService.getMe();
+
+        if (userOpt.isPresent() && userOpt.get().getRole().equals(Roles.CLIENT))
+            return getAllByClient(userOpt.get().getId());
+
+        if (userOpt.isPresent() && userOpt.get().getRole().equals(Roles.PROVIDER))
+            return getAllByProvider(userOpt.get().getId());
+
+        throw new EmptyCollectionException("I'm sorry, you don't requested any call");
     }
 
     private Optional<Call> getById(Long id) {

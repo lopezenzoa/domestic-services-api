@@ -11,4 +11,6 @@ public interface ReviewService {
     List<ReviewDTO> getAllByClient(Long clientId);
     List<ReviewDTO> getAllByProvider(Long providerId);
     boolean delete(Long id);
+
+    List<ReviewDTO> getMe();
 }

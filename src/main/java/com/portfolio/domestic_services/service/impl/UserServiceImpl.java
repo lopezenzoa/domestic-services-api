@@ -9,6 +9,7 @@ import com.portfolio.domestic_services.service.UserService;
 import com.portfolio.domestic_services.service.exceptions.ResourceNotFoundException;
 import com.portfolio.domestic_services.service.exceptions.UniquenessViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -98,6 +99,15 @@ public class UserServiceImpl implements UserService {
 
         if (anyFieldMatch)
             throw new UniquenessViolationException("I'm sorry but one of the following fields already exists in the system: email, phone number or username");
+    }
+
+    @Override
+    public Optional<UserDTO> getMe() {
+        Object authUsername = SecurityContextHolder.getContext().getAuthentication().getPrincipal(); // this getName() retrieves the email
+
+        Optional<User> userOpt = repository.findByUsername((String) authUsername);
+
+        return userOpt.map(user -> mapper.toDto(user));
     }
 
     private boolean existsByPhoneNumber(String phoneNumber) {

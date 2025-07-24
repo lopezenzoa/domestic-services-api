@@ -3,12 +3,16 @@ package com.portfolio.domestic_services.service.impl;
 import com.portfolio.domestic_services.dto.ClientDTO;
 import com.portfolio.domestic_services.dto.FlagDTO;
 import com.portfolio.domestic_services.dto.ProviderDTO;
+import com.portfolio.domestic_services.dto.UserDTO;
 import com.portfolio.domestic_services.mappers.FlagMapper;
 import com.portfolio.domestic_services.model.Flag;
+import com.portfolio.domestic_services.model.Roles;
 import com.portfolio.domestic_services.repository.FlagRepository;
 import com.portfolio.domestic_services.service.ClientService;
 import com.portfolio.domestic_services.service.FlagService;
 import com.portfolio.domestic_services.service.ProviderService;
+import com.portfolio.domestic_services.service.UserService;
+import com.portfolio.domestic_services.service.exceptions.EmptyCollectionException;
 import com.portfolio.domestic_services.service.exceptions.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,6 +27,7 @@ public class FlagServiceImpl implements FlagService {
     @Autowired private FlagMapper mapper;
     @Autowired private ClientService clientService;
     @Autowired private ProviderService providerService;
+    @Autowired private UserService userService;
 
     @Override
     public Optional<FlagDTO> create(FlagDTO dto) {
@@ -74,5 +79,18 @@ public class FlagServiceImpl implements FlagService {
 
         repository.deleteById(id);
         return true;
+    }
+
+    @Override
+    public List<FlagDTO> getMe() {
+        Optional<UserDTO> userOpt = userService.getMe();
+
+        if (userOpt.isPresent() && userOpt.get().getRole().equals(Roles.CLIENT))
+            return getByClient(userOpt.get().getId());
+
+        if (userOpt.isPresent() && userOpt.get().getRole().equals(Roles.PROVIDER))
+            return getByProvider(userOpt.get().getId());
+
+        throw new EmptyCollectionException("I'm sorry, you don't have any flags");
     }
 }

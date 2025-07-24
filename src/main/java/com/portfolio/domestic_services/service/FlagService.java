@@ -11,4 +11,6 @@ public interface FlagService {
     List<FlagDTO> getByClient(Long clientId);
     List<FlagDTO> getAll();
     boolean delete(Long id);
+
+    List<FlagDTO> getMe();
 }

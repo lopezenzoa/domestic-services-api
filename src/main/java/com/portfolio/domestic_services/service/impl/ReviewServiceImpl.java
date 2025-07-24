@@ -1,14 +1,15 @@
 package com.portfolio.domestic_services.service.impl;
 
-import com.portfolio.domestic_services.dto.ClientDTO;
-import com.portfolio.domestic_services.dto.ProviderDTO;
-import com.portfolio.domestic_services.dto.ReviewDTO;
+import com.portfolio.domestic_services.dto.*;
 import com.portfolio.domestic_services.mappers.ReviewMapper;
 import com.portfolio.domestic_services.model.Review;
+import com.portfolio.domestic_services.model.Roles;
 import com.portfolio.domestic_services.repository.ReviewRepository;
 import com.portfolio.domestic_services.service.ClientService;
 import com.portfolio.domestic_services.service.ProviderService;
 import com.portfolio.domestic_services.service.ReviewService;
+import com.portfolio.domestic_services.service.UserService;
+import com.portfolio.domestic_services.service.exceptions.EmptyCollectionException;
 import com.portfolio.domestic_services.service.exceptions.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,6 +24,7 @@ public class ReviewServiceImpl implements ReviewService {
     @Autowired private ReviewMapper mapper;
     @Autowired private ProviderService providerService;
     @Autowired private ClientService clientService;
+    @Autowired private UserService userService;
 
     @Override
     public Optional<ReviewDTO> create(ReviewDTO dto) {
@@ -70,5 +72,18 @@ public class ReviewServiceImpl implements ReviewService {
 
         repository.deleteById(id);
         return true;
+    }
+
+    @Override
+    public List<ReviewDTO> getMe() {
+        Optional<UserDTO> userOpt = userService.getMe();
+
+        if (userOpt.isPresent() && userOpt.get().getRole().equals(Roles.CLIENT))
+            return getAllByClient(userOpt.get().getId());
+
+        if (userOpt.isPresent() && userOpt.get().getRole().equals(Roles.PROVIDER))
+            return getAllByProvider(userOpt.get().getId());
+
+        throw new EmptyCollectionException("I'm sorry, you don't have any reviews");
     }
 }

@@ -15,4 +15,6 @@ public interface CallService {
     boolean accept(Long providerId, Long callId);
     boolean decline(Long providerId, Long callId);
     boolean delete(Long id);
+
+    List<CallDTO> getMe();
 }

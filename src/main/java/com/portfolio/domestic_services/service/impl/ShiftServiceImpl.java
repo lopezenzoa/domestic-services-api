@@ -2,11 +2,15 @@ package com.portfolio.domestic_services.service.impl;
 
 import com.portfolio.domestic_services.dto.ProviderDTO;
 import com.portfolio.domestic_services.dto.ShiftDTO;
+import com.portfolio.domestic_services.dto.UserDTO;
 import com.portfolio.domestic_services.mappers.ShiftMapper;
+import com.portfolio.domestic_services.model.Roles;
 import com.portfolio.domestic_services.model.Shift;
 import com.portfolio.domestic_services.repository.ShiftRepository;
 import com.portfolio.domestic_services.service.ProviderService;
 import com.portfolio.domestic_services.service.ShiftService;
+import com.portfolio.domestic_services.service.UserService;
+import com.portfolio.domestic_services.service.exceptions.EmptyCollectionException;
 import com.portfolio.domestic_services.service.exceptions.UniquenessViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,6 +24,7 @@ public class ShiftServiceImpl implements ShiftService {
     @Autowired private ShiftRepository repository;
     @Autowired private ShiftMapper mapper;
     @Autowired private ProviderService providerService;
+    @Autowired private UserService userService;
 
     @Override
     public Optional<ShiftDTO> create(ShiftDTO dto, Long providerId) {
@@ -142,5 +147,15 @@ public class ShiftServiceImpl implements ShiftService {
         filteredShift.setAvailable(false); // taking the shift
 
         update(filteredShift, providerId);
+    }
+
+    @Override
+    public List<ShiftDTO> getMe() {
+        Optional<UserDTO> userOpt = userService.getMe();
+
+        if (userOpt.isPresent() && userOpt.get().getRole().equals(Roles.PROVIDER))
+            return getAllByProviderId(userOpt.get().getId());
+
+        throw new EmptyCollectionException("I'm sorry, you don't have any shifts");
     }
 }

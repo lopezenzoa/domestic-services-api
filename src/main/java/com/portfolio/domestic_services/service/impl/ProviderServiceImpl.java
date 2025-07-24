@@ -2,6 +2,7 @@ package com.portfolio.domestic_services.service.impl;
 
 import com.portfolio.domestic_services.dto.FacilityDTO;
 import com.portfolio.domestic_services.dto.ProviderDTO;
+import com.portfolio.domestic_services.dto.UserDTO;
 import com.portfolio.domestic_services.mappers.ProviderMapper;
 import com.portfolio.domestic_services.model.Provider;
 import com.portfolio.domestic_services.model.Roles;
@@ -81,5 +82,15 @@ public class ProviderServiceImpl implements ProviderService {
     @Override
     public Provider mapToEntity(ProviderDTO dto) {
         return mapper.toEntity(dto);
+    }
+
+    @Override
+    public Optional<ProviderDTO> getMe() {
+        Optional<UserDTO> userOpt = userService.getMe();
+
+        if (userOpt.isPresent() && userOpt.get().getRole().equals(Roles.PROVIDER))
+            return getById(userOpt.get().getId());
+
+        return Optional.empty();
     }
 }

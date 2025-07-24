@@ -14,4 +14,6 @@ public interface ProviderService {
     List<ProviderDTO> getAll();
     boolean delete(Long id);
     Provider mapToEntity(ProviderDTO dto);
+
+    Optional<ProviderDTO> getMe();
 }

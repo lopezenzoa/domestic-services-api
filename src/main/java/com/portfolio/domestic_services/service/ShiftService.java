@@ -16,4 +16,6 @@ public interface ShiftService {
     // methods related to the calls
     boolean checkRequestedDate(String dtoDate, Long providerId);
     void takeShiftOfProvider(Long providerId, LocalDateTime callDate);
+
+    List<ShiftDTO> getMe();
 }

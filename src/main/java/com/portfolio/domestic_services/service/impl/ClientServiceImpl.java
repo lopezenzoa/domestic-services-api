@@ -1,6 +1,7 @@
 package com.portfolio.domestic_services.service.impl;
 
 import com.portfolio.domestic_services.dto.ClientDTO;
+import com.portfolio.domestic_services.dto.UserDTO;
 import com.portfolio.domestic_services.mappers.ClientMapper;
 import com.portfolio.domestic_services.model.Client;
 import com.portfolio.domestic_services.model.Roles;
@@ -68,5 +69,15 @@ public class ClientServiceImpl implements ClientService {
 
         repository.deleteById(id);
         return true;
+    }
+
+    @Override
+    public Optional<ClientDTO> getMe() {
+        Optional<UserDTO> userOpt = userService.getMe();
+
+        if (userOpt.isPresent() && userOpt.get().getRole().equals(Roles.CLIENT))
+            return getById(userOpt.get().getId());
+
+        return Optional.empty();
     }
 }

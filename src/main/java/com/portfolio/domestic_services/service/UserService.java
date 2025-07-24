@@ -15,4 +15,6 @@ public interface UserService {
 
     void checkFieldsUniquenessOnCreate(String email, String phoneNumber, String username) throws UniquenessViolationException;
     void checkFieldsUniquenessOnUpdate(Long userId, String email, String phoneNumber, String username) throws UniquenessViolationException;
+
+    Optional<UserDTO> getMe();
 }
