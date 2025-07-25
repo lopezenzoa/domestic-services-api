@@ -1,6 +1,5 @@
 package com.portfolio.domestic_services.controller;
 
-import com.portfolio.domestic_services.dto.ClientDTO;
 import com.portfolio.domestic_services.dto.FacilityDTO;
 import com.portfolio.domestic_services.service.FacilityService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -25,7 +24,9 @@ public class FacilityController {
     @Operation(summary = "Create a new Facility")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Facility created"),
-            @ApiResponse(responseCode = "400", description = "Invalid Facility data")
+            @ApiResponse(responseCode = "400", description = "Invalid Facility data"),
+            @ApiResponse(responseCode = "403", description = "Access forbidden"),
+            @ApiResponse(responseCode = "401", description = "Request not authenticated")
     })
     @PostMapping("/create")
     public ResponseEntity<FacilityDTO> create(
@@ -36,6 +37,22 @@ public class FacilityController {
         return response.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.badRequest().build());
     }
 
+    @Operation(
+            summary = "Get a full list of facilities",
+            description = "Returns a Facility data"
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "List of facilities",
+                    content =  @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = FacilityDTO.class)
+                    )
+            ),
+            @ApiResponse(responseCode = "403", description = "Access forbidden"),
+            @ApiResponse(responseCode = "401", description = "Request not authenticated")
+    })
     @GetMapping("/")
     public ResponseEntity<List<FacilityDTO>> getAll() {
         return ResponseEntity.ok(service.getAll());
@@ -54,7 +71,9 @@ public class FacilityController {
                             schema = @Schema(implementation = FacilityDTO.class)
                     )
             ),
-            @ApiResponse(responseCode = "404", description = "Facility not found")
+            @ApiResponse(responseCode = "404", description = "Facility not found"),
+            @ApiResponse(responseCode = "403", description = "Access forbidden"),
+            @ApiResponse(responseCode = "401", description = "Request not authenticated")
     })
     @GetMapping("/search")
     public ResponseEntity<FacilityDTO> findByName(

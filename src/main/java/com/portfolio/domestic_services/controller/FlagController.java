@@ -24,7 +24,9 @@ public class FlagController {
     @Operation(summary = "Create a new Flag")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Flag created"),
-            @ApiResponse(responseCode = "400", description = "Invalid Flag data")
+            @ApiResponse(responseCode = "400", description = "Invalid Flag data"),
+            @ApiResponse(responseCode = "403", description = "Access forbidden"),
+            @ApiResponse(responseCode = "401", description = "Request not authenticated")
     })
     @PostMapping("/create")
     public ResponseEntity<FlagDTO> create(
@@ -39,14 +41,18 @@ public class FlagController {
             summary = "Get a full list of flags",
             description = "Returns a list of flags"
     )
-    @ApiResponse(
-            responseCode = "200",
-            description = "List of flags",
-            content =  @Content(
-                    mediaType = "application/json",
-                    schema = @Schema(implementation = FlagDTO.class)
-            )
-    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "List of flags",
+                    content =  @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = FlagDTO.class)
+                    )
+            ),
+            @ApiResponse(responseCode = "403", description = "Access forbidden"),
+            @ApiResponse(responseCode = "401", description = "Request not authenticated")
+    })
     @GetMapping("/")
     public ResponseEntity<List<FlagDTO>> getAll() {
         return ResponseEntity.ok(service.getAll());
@@ -56,14 +62,18 @@ public class FlagController {
             summary = "Get all reviews of a Provider",
             description = "Returns a list of all flags of a specific Provider given its id"
     )
-    @ApiResponse(
-            responseCode = "200",
-            description = "List of Provider's flags",
-            content =  @Content(
-                    mediaType = "application/json",
-                    schema = @Schema(implementation = FlagDTO.class)
-            )
-    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "List of Provider's flags",
+                    content =  @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = FlagDTO.class)
+                    )
+            ),
+            @ApiResponse(responseCode = "403", description = "Access forbidden"),
+            @ApiResponse(responseCode = "401", description = "Request not authenticated")
+    })
     @GetMapping("/provider/{providerId}")
     public ResponseEntity<List<FlagDTO>> getByProvider(
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "ID of the Provider searched")
@@ -76,14 +86,18 @@ public class FlagController {
             summary = "Get all flags of a Client",
             description = "Returns a list of all flags of a specific Client given its id"
     )
-    @ApiResponse(
-            responseCode = "200",
-            description = "List of Client's flags",
-            content =  @Content(
-                    mediaType = "application/json",
-                    schema = @Schema(implementation = FlagDTO.class)
-            )
-    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "List of Client's flags",
+                    content =  @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = FlagDTO.class)
+                    )
+            ),
+            @ApiResponse(responseCode = "403", description = "Access forbidden"),
+            @ApiResponse(responseCode = "401", description = "Request not authenticated")
+    })
     @GetMapping("/client/{clientId}")
     public ResponseEntity<List<FlagDTO>> getByClient(
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "ID of the Client searched")
@@ -95,7 +109,9 @@ public class FlagController {
     @Operation(summary = "Delete a specific Flag")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Flag deleted"),
-            @ApiResponse(responseCode = "404", description = "Flag didn't found")
+            @ApiResponse(responseCode = "404", description = "Flag didn't found"),
+            @ApiResponse(responseCode = "403", description = "Access forbidden"),
+            @ApiResponse(responseCode = "401", description = "Request not authenticated")
     })
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> delete(
@@ -108,5 +124,23 @@ public class FlagController {
             return ResponseEntity.ok().build();
 
         return ResponseEntity.notFound().build();
+    }
+
+
+    @Operation(summary = "Gets flags from the context's User")
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "List of User's flags",
+                    content =  @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = FlagDTO.class)
+                    )
+            ),
+            @ApiResponse(responseCode = "403", description = "Access forbidden")
+    })
+    @GetMapping("/me")
+    public ResponseEntity<List<FlagDTO>> getMe() {
+        return ResponseEntity.ok(service.getMe());
     }
 }

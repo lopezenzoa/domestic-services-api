@@ -26,7 +26,9 @@ public class ClientController {
     @Operation(summary = "Create a new Client")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Client created"),
-            @ApiResponse(responseCode = "400", description = "Invalid Client data")
+            @ApiResponse(responseCode = "400", description = "Invalid Client data"),
+            @ApiResponse(responseCode = "403", description = "Access forbidden"),
+            @ApiResponse(responseCode = "401", description = "Request not authenticated")
     })
     @PostMapping("/create")
     public ResponseEntity<ClientDTO> create(
@@ -40,7 +42,9 @@ public class ClientController {
     @Operation(summary = "Update a Client")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Client updated"),
-            @ApiResponse(responseCode = "400", description = "Invalid Client data")
+            @ApiResponse(responseCode = "400", description = "Invalid Client data"),
+            @ApiResponse(responseCode = "403", description = "Access forbidden"),
+            @ApiResponse(responseCode = "401", description = "Request not authenticated")
     })
     @PutMapping("/update")
     public ResponseEntity<ClientDTO> update(
@@ -64,7 +68,9 @@ public class ClientController {
                             schema = @Schema(implementation = ClientDTO.class)
                     )
             ),
-            @ApiResponse(responseCode = "404", description = "Client not found")
+            @ApiResponse(responseCode = "404", description = "Client not found"),
+            @ApiResponse(responseCode = "403", description = "Access forbidden"),
+            @ApiResponse(responseCode = "401", description = "Request not authenticated")
     })
     @GetMapping("/{id}")
     public ResponseEntity<ClientDTO> getById(
@@ -79,14 +85,18 @@ public class ClientController {
             summary = "Get a full list of clients",
             description = "Returns a list of clients"
     )
-    @ApiResponse(
-            responseCode = "200",
-            description = "List of clients",
-            content =  @Content(
-                    mediaType = "application/json",
-                    schema = @Schema(implementation = ClientDTO.class)
-            )
-    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "List of clients",
+                    content =  @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ClientDTO.class)
+                    )
+            ),
+            @ApiResponse(responseCode = "403", description = "Access forbidden"),
+            @ApiResponse(responseCode = "401", description = "Request not authenticated")
+    })
     @GetMapping("/")
     public ResponseEntity<List<ClientDTO>> getAll() {
         return ResponseEntity.ok(service.getAll());
@@ -95,7 +105,9 @@ public class ClientController {
     @Operation(summary = "Delete a specific Client")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Client deleted"),
-            @ApiResponse(responseCode = "404", description = "Client didn't found")
+            @ApiResponse(responseCode = "404", description = "Client didn't found"),
+            @ApiResponse(responseCode = "403", description = "Access forbidden"),
+            @ApiResponse(responseCode = "401", description = "Request not authenticated")
     })
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> delete(
@@ -108,5 +120,26 @@ public class ClientController {
             return ResponseEntity.ok().build();
 
         return ResponseEntity.badRequest().build();
+    }
+
+    @Operation(
+            summary = "Get a Client from the context",
+            description = "Returns a Client data"
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Client data",
+                    content =  @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ClientDTO.class)
+                    )
+            ),
+            @ApiResponse(responseCode = "403", description = "Access forbidden")
+    })
+    @GetMapping("/me")
+    public ResponseEntity<ClientDTO> getMe() {
+        Optional<ClientDTO> response = service.getMe();
+        return response.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 }

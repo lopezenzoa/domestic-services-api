@@ -25,7 +25,9 @@ public class ProviderController {
     @Operation(summary = "Create a new Provider")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Provider created"),
-            @ApiResponse(responseCode = "400", description = "Invalid Provider data")
+            @ApiResponse(responseCode = "400", description = "Invalid Provider data"),
+            @ApiResponse(responseCode = "403", description = "Access forbidden"),
+            @ApiResponse(responseCode = "401", description = "Request not authenticated")
     })
     @PostMapping("/create")
     public ResponseEntity<ProviderDTO> create(
@@ -39,14 +41,16 @@ public class ProviderController {
     @Operation(summary = "Update a Provider")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Provider updated"),
-            @ApiResponse(responseCode = "400", description = "Invalid Provider data")
+            @ApiResponse(responseCode = "400", description = "Invalid Provider data"),
+            @ApiResponse(responseCode = "403", description = "Access forbidden"),
+            @ApiResponse(responseCode = "401", description = "Request not authenticated")
     })
     @PutMapping("/update")
     public ResponseEntity<ProviderDTO> update(
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Provider data needed to update")
             @RequestBody ProviderDTO body
     ) throws UniquenessViolationException {
-        Optional<ProviderDTO> response = service.create(body);
+        Optional<ProviderDTO> response = service.update(body);
         return response.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.badRequest().build());
     }
 
@@ -63,7 +67,9 @@ public class ProviderController {
                             schema = @Schema(implementation = ProviderDTO.class)
                     )
             ),
-            @ApiResponse(responseCode = "404", description = "Client not found")
+            @ApiResponse(responseCode = "404", description = "Client not found"),
+            @ApiResponse(responseCode = "403", description = "Access forbidden"),
+            @ApiResponse(responseCode = "401", description = "Request not authenticated")
     })
     @GetMapping("/{id}")
     public ResponseEntity<ProviderDTO> getById(
@@ -78,14 +84,18 @@ public class ProviderController {
             summary = "Get a full list of providers",
             description = "Returns a list of providers"
     )
-    @ApiResponse(
-            responseCode = "200",
-            description = "List of providers",
-            content =  @Content(
-                    mediaType = "application/json",
-                    schema = @Schema(implementation = ProviderDTO.class)
-            )
-    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "List of providers",
+                    content =  @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ProviderDTO.class)
+                    )
+            ),
+            @ApiResponse(responseCode = "403", description = "Access forbidden"),
+            @ApiResponse(responseCode = "401", description = "Request not authenticated")
+    })
     @GetMapping("/")
     public ResponseEntity<List<ProviderDTO>> getAll() {
         return ResponseEntity.ok(service.getAll());
@@ -94,7 +104,9 @@ public class ProviderController {
     @Operation(summary = "Delete a specific Client")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Provider deleted"),
-            @ApiResponse(responseCode = "404", description = "Provider didn't found")
+            @ApiResponse(responseCode = "404", description = "Provider didn't found"),
+            @ApiResponse(responseCode = "403", description = "Access forbidden"),
+            @ApiResponse(responseCode = "401", description = "Request not authenticated")
     })
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> delete(
@@ -107,5 +119,26 @@ public class ProviderController {
             return ResponseEntity.ok().build();
 
         return ResponseEntity.badRequest().build();
+    }
+
+    @Operation(
+            summary = "Get a Provider from the context",
+            description = "Returns a Provider data"
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Provider data",
+                    content =  @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ProviderDTO.class)
+                    )
+            ),
+            @ApiResponse(responseCode = "403", description = "Access forbidden")
+    })
+    @GetMapping("/me")
+    public ResponseEntity<ProviderDTO> getMe() {
+        Optional<ProviderDTO> response = service.getMe();
+        return response.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 }

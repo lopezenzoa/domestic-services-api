@@ -22,32 +22,22 @@ import java.util.Optional;
 public class UserController {
     @Autowired private UserService service;
 
-    @Operation(summary = "Create a new User")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "User created"),
-            @ApiResponse(responseCode = "400", description = "Invalid User data")
-    })
-    @PostMapping("/create")
-    public ResponseEntity<UserDTO> create(
-            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "User data needed to create")
-            @RequestBody UserDTO body
-    ) throws UniquenessViolationException {
-        Optional<UserDTO> userOpt = service.create(body);
-        return userOpt.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.badRequest().build());
-    }
-
     @Operation(
             summary = "Get a full list of users",
             description = "Returns a list of users"
     )
-    @ApiResponse(
-            responseCode = "200",
-            description = "List of users",
-            content =  @Content(
-                    mediaType = "application/json",
-                    schema = @Schema(implementation = UserDTO.class)
-            )
-    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "List of users",
+                    content =  @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = UserDTO.class)
+                    )
+            ),
+            @ApiResponse(responseCode = "403", description = "Access forbidden"),
+            @ApiResponse(responseCode = "401", description = "Request not authenticated")
+    })
     @GetMapping("/")
     public ResponseEntity<List<UserDTO>> getAll() {
         return ResponseEntity.ok(service.getAll());
@@ -66,7 +56,9 @@ public class UserController {
                             schema = @Schema(implementation = UserDTO.class)
                     )
             ),
-            @ApiResponse(responseCode = "404", description = "User not found")
+            @ApiResponse(responseCode = "404", description = "User not found"),
+            @ApiResponse(responseCode = "403", description = "Access forbidden"),
+            @ApiResponse(responseCode = "401", description = "Request not authenticated")
     })
     @GetMapping("/{id}")
     public ResponseEntity<UserDTO> getById(
@@ -80,7 +72,9 @@ public class UserController {
     @Operation(summary = "Update a User")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "User updated"),
-            @ApiResponse(responseCode = "400", description = "Invalid User data")
+            @ApiResponse(responseCode = "400", description = "Invalid User data"),
+            @ApiResponse(responseCode = "403", description = "Access forbidden"),
+            @ApiResponse(responseCode = "401", description = "Request not authenticated")
     })
     @PutMapping("/update")
     public ResponseEntity<UserDTO> update(
@@ -94,7 +88,9 @@ public class UserController {
     @Operation(summary = "Delete a specific User")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "User deleted"),
-            @ApiResponse(responseCode = "404", description = "User didn't found")
+            @ApiResponse(responseCode = "404", description = "User didn't found"),
+            @ApiResponse(responseCode = "403", description = "Access forbidden"),
+            @ApiResponse(responseCode = "401", description = "Request not authenticated")
     })
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> delete(
@@ -107,5 +103,22 @@ public class UserController {
             return ResponseEntity.ok().build();
 
         return ResponseEntity.notFound().build();
+    }
+
+    @Operation(summary = "Gets reviews from the context's User")
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "User data",
+                    content =  @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = UserDTO.class)
+                    )
+            ),
+            @ApiResponse(responseCode = "403", description = "Access forbidden")
+    })
+    @GetMapping("/me")
+    public ResponseEntity<UserDTO> getMe() {
+        return service.getMe().map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 }

@@ -24,7 +24,9 @@ public class ReviewController {
     @Operation(summary = "Create a new Review")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Review created"),
-            @ApiResponse(responseCode = "400", description = "Invalid Review data")
+            @ApiResponse(responseCode = "400", description = "Invalid Review data"),
+            @ApiResponse(responseCode = "403", description = "Access forbidden"),
+            @ApiResponse(responseCode = "401", description = "Request not authenticated")
     })
     @PostMapping("/create")
     public ResponseEntity<ReviewDTO> create(
@@ -39,14 +41,18 @@ public class ReviewController {
             summary = "Get a full list of reviews",
             description = "Returns a list of reviews"
     )
-    @ApiResponse(
-            responseCode = "200",
-            description = "List of reviews",
-            content =  @Content(
-                    mediaType = "application/json",
-                    schema = @Schema(implementation = ReviewDTO.class)
-            )
-    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "List of reviews",
+                    content =  @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ReviewDTO.class)
+                    )
+            ),
+            @ApiResponse(responseCode = "403", description = "Access forbidden"),
+            @ApiResponse(responseCode = "401", description = "Request not authenticated")
+    })
     @GetMapping("/")
     public ResponseEntity<List<ReviewDTO>> getAll() {
         return ResponseEntity.ok(service.getAll());
@@ -56,14 +62,18 @@ public class ReviewController {
             summary = "Get all reviews of a Client",
             description = "Returns a list of all reviews of a specific Client given its id"
     )
-    @ApiResponse(
-            responseCode = "200",
-            description = "List of Client's reviews",
-            content =  @Content(
-                    mediaType = "application/json",
-                    schema = @Schema(implementation = ReviewDTO.class)
-            )
-    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "List of Client's reviews",
+                    content =  @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ReviewDTO.class)
+                    )
+            ),
+            @ApiResponse(responseCode = "403", description = "Access forbidden"),
+            @ApiResponse(responseCode = "401", description = "Request not authenticated")
+    })
     @GetMapping("/client/{id}")
     public ResponseEntity<List<ReviewDTO>> getAllByClient(
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "ID of the Client searched")
@@ -76,14 +86,18 @@ public class ReviewController {
             summary = "Get all reviews made to a Provider",
             description = "Returns a list of all reviews made to a specific Provider given its id"
     )
-    @ApiResponse(
-            responseCode = "200",
-            description = "List of Provider's reviews",
-            content =  @Content(
-                    mediaType = "application/json",
-                    schema = @Schema(implementation = ReviewDTO.class)
-            )
-    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "List of Provider's reviews",
+                    content =  @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ReviewDTO.class)
+                    )
+            ),
+            @ApiResponse(responseCode = "403", description = "Access forbidden"),
+            @ApiResponse(responseCode = "401", description = "Request not authenticated")
+    })
     @GetMapping("/provider/{id}")
     public ResponseEntity<List<ReviewDTO>> getAllByProvider(
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "ID of the Provider searched")
@@ -95,7 +109,9 @@ public class ReviewController {
     @Operation(summary = "Delete a specific Review")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Review deleted"),
-            @ApiResponse(responseCode = "404", description = "Review didn't found")
+            @ApiResponse(responseCode = "404", description = "Review didn't found"),
+            @ApiResponse(responseCode = "403", description = "Access forbidden"),
+            @ApiResponse(responseCode = "401", description = "Request not authenticated")
     })
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> delete(
@@ -108,5 +124,23 @@ public class ReviewController {
             return ResponseEntity.ok().build();
 
         return ResponseEntity.notFound().build();
+    }
+
+
+    @Operation(summary = "Gets reviews from the context's User")
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "List of User's reviews",
+                    content =  @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ReviewDTO.class)
+                    )
+            ),
+            @ApiResponse(responseCode = "403", description = "Access forbidden"),
+    })
+    @GetMapping("/me")
+    public ResponseEntity<List<ReviewDTO>> getMe() {
+        return ResponseEntity.ok(service.getMe());
     }
 }

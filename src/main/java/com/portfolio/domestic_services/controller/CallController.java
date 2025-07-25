@@ -25,7 +25,9 @@ public class CallController {
     @Operation(summary = "Request a new Call of a Provider")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Call requested"),
-            @ApiResponse(responseCode = "400", description = "Invalid request for Call")
+            @ApiResponse(responseCode = "400", description = "Invalid request for Call"),
+            @ApiResponse(responseCode = "403", description = "Access forbidden"),
+            @ApiResponse(responseCode = "401", description = "Request not authenticated")
     })
     @PostMapping("/request")
     public ResponseEntity<CallDTO> request(
@@ -40,14 +42,19 @@ public class CallController {
             summary = "Get all calls",
             description = "Returns a list of all calls made historically"
     )
-    @ApiResponse(
-            responseCode = "200",
-            description = "List of calls",
-            content =  @Content(
-                    mediaType = "application/json",
-                    schema = @Schema(implementation = CallDTO.class)
-            )
-    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "List of calls",
+                    content =  @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = CallDTO.class)
+                    )
+            ),
+            @ApiResponse(responseCode = "403", description = "Access forbidden"),
+            @ApiResponse(responseCode = "401", description = "Request not authenticated")
+    })
+
     @GetMapping("/")
     public ResponseEntity<List<CallDTO>> getAll() {
         return ResponseEntity.ok(service.getAll());
@@ -57,14 +64,18 @@ public class CallController {
             summary = "Get all calls of a specific Client",
             description = "Returns a list of all calls of a specific Client given its id"
     )
-    @ApiResponse(
-            responseCode = "200",
-            description = "List of Client's calls",
-            content =  @Content(
-                    mediaType = "application/json",
-                    schema = @Schema(implementation = CallDTO.class)
-            )
-    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "List of Client's calls",
+                    content =  @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = CallDTO.class)
+                    )
+            ),
+            @ApiResponse(responseCode = "403", description = "Access forbidden"),
+            @ApiResponse(responseCode = "401", description = "Request not authenticated")
+    })
     @GetMapping("/client/{id}")
     public ResponseEntity<List<CallDTO>> getCallsByClient(
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "The ID of the Client to consult")
@@ -77,14 +88,18 @@ public class CallController {
             summary = "Get all calls of a specific Provider",
             description = "Returns a list of all calls of a specific Provider given its id"
     )
-    @ApiResponse(
-            responseCode = "200",
-            description = "List of Provider's calls",
-            content =  @Content(
-                    mediaType = "application/json",
-                    schema = @Schema(implementation = CallDTO.class)
-            )
-    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "List of Provider's calls",
+                    content =  @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = CallDTO.class)
+                    )
+            ),
+            @ApiResponse(responseCode = "403", description = "Access forbidden"),
+            @ApiResponse(responseCode = "401", description = "Request not authenticated")
+    })
     @GetMapping("/provider/{id}")
     public ResponseEntity<List<CallDTO>> getCallsByProvider(
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "The ID of the Provider to consult")
@@ -97,14 +112,18 @@ public class CallController {
             summary = "Get all requested calls of a Provider",
             description = "Returns a list of all requested calls of a specific Provider given its id"
     )
-    @ApiResponse(
-            responseCode = "200",
-            description = "List of requested Provider's calls",
-            content =  @Content(
-                    mediaType = "application/json",
-                    schema = @Schema(implementation = CallDTO.class)
-            )
-    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "List of requested Provider's calls",
+                    content =  @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = CallDTO.class)
+                    )
+            ),
+            @ApiResponse(responseCode = "403", description = "Access forbidden"),
+            @ApiResponse(responseCode = "401", description = "Request not authenticated")
+    })
     @GetMapping("/provider/{id}/requested")
     public ResponseEntity<List<CallDTO>> getRequestedCallsByProvider(
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "The ID of the Provider to consult")
@@ -116,7 +135,9 @@ public class CallController {
     @Operation(summary = "Accept a requested specific Call")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Requested Call accepted"),
-            @ApiResponse(responseCode = "400", description = "Invalid path variables (maybe doesn't exist the Provider or the Call)")
+            @ApiResponse(responseCode = "400", description = "Invalid path variables (maybe doesn't exist the Provider or the Call)"),
+            @ApiResponse(responseCode = "403", description = "Access forbidden"),
+            @ApiResponse(responseCode = "401", description = "Request not authenticated")
     })
     @PutMapping("/provider/{providerId}/accept/{callId}")
     public ResponseEntity<Void> acceptCall(
@@ -136,7 +157,9 @@ public class CallController {
     @Operation(summary = "Decline a requested specific Call")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Requested Call declined"),
-            @ApiResponse(responseCode = "400", description = "Invalid path variables (maybe doesn't exist the Provider or the Call)")
+            @ApiResponse(responseCode = "400", description = "Invalid path variables (maybe doesn't exist the Provider or the Call)"),
+            @ApiResponse(responseCode = "403", description = "Access forbidden"),
+            @ApiResponse(responseCode = "401", description = "Request not authenticated")
     })
     @PutMapping("/provider/{providerId}/decline/{callId}")
     public ResponseEntity<Void> declineCall(
@@ -156,7 +179,9 @@ public class CallController {
     @Operation(summary = "Delete a specific Call")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Call deleted"),
-            @ApiResponse(responseCode = "404", description = "Call didn't found")
+            @ApiResponse(responseCode = "404", description = "Call didn't found"),
+            @ApiResponse(responseCode = "403", description = "Access forbidden"),
+            @ApiResponse(responseCode = "401", description = "Request not authenticated")
     })
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> delete(
@@ -169,5 +194,22 @@ public class CallController {
             return ResponseEntity.ok().build();
 
         return ResponseEntity.notFound().build();
+    }
+
+    @Operation(summary = "Gets calls from the context's User")
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "List of User's calls",
+                    content =  @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = CallDTO.class)
+                    )
+            ),
+            @ApiResponse(responseCode = "403", description = "Access forbidden")
+    })
+    @GetMapping("/me")
+    public ResponseEntity<List<CallDTO>> getMe() {
+        return ResponseEntity.ok(service.getMe());
     }
 }

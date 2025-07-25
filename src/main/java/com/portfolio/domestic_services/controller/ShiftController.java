@@ -1,6 +1,5 @@
 package com.portfolio.domestic_services.controller;
 
-import com.portfolio.domestic_services.dto.ReviewDTO;
 import com.portfolio.domestic_services.dto.ShiftDTO;
 import com.portfolio.domestic_services.service.ShiftService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -25,7 +24,9 @@ public class ShiftController {
     @Operation(summary = "Create a new Shift")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Shift created"),
-            @ApiResponse(responseCode = "400", description = "Invalid Shift data")
+            @ApiResponse(responseCode = "400", description = "Invalid Shift data"),
+            @ApiResponse(responseCode = "403", description = "Access forbidden"),
+            @ApiResponse(responseCode = "401", description = "Request not authenticated")
     })
     // I have to think a way of build URLs in a cleaner format, since this is show as follows: /api/providers/shifts/{6, 7, 8, ...}/create
     @PostMapping("/{providerId}/create")
@@ -43,14 +44,18 @@ public class ShiftController {
             summary = "Get all shifts of a Provider",
             description = "Returns a list of all shifts of a specific Provider given its id"
     )
-    @ApiResponse(
-            responseCode = "200",
-            description = "List of Provider's shifts",
-            content =  @Content(
-                    mediaType = "application/json",
-                    schema = @Schema(implementation = ShiftDTO.class)
-            )
-    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "List of Provider's shifts",
+                    content =  @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ShiftDTO.class)
+                    )
+            ),
+            @ApiResponse(responseCode = "403", description = "Access forbidden"),
+            @ApiResponse(responseCode = "401", description = "Request not authenticated")
+    })
     @GetMapping("/{providerId}")
     public ResponseEntity<List<ShiftDTO>> getAllByProviderId(
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "ID of the Provider owner of the shifts")
@@ -63,14 +68,18 @@ public class ShiftController {
             summary = "Get all available shifts of a Provider",
             description = "Returns a list of all available shifts of a specific Provider given its id"
     )
-    @ApiResponse(
-            responseCode = "200",
-            description = "List of Provider's available shifts",
-            content =  @Content(
-                    mediaType = "application/json",
-                    schema = @Schema(implementation = ShiftDTO.class)
-            )
-    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "List of Provider's available shifts",
+                    content =  @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ShiftDTO.class)
+                    )
+            ),
+            @ApiResponse(responseCode = "403", description = "Access forbidden"),
+            @ApiResponse(responseCode = "401", description = "Request not authenticated")
+    })
     @GetMapping("/{providerId}/available")
     public ResponseEntity<List<ShiftDTO>> getAvailableByProviderId(
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "ID of the Provider owner of the available shifts")
@@ -82,7 +91,9 @@ public class ShiftController {
     @Operation(summary = "Update a Shift")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Shift updated"),
-            @ApiResponse(responseCode = "400", description = "Invalid Shift data")
+            @ApiResponse(responseCode = "400", description = "Invalid Shift data"),
+            @ApiResponse(responseCode = "403", description = "Access forbidden"),
+            @ApiResponse(responseCode = "401", description = "Request not authenticated")
     })
     @PutMapping("/{providerId}/update")
     public ResponseEntity<ShiftDTO> update(
@@ -98,7 +109,9 @@ public class ShiftController {
     @Operation(summary = "Delete a specific Shift of a Provider")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Shift deleted"),
-            @ApiResponse(responseCode = "404", description = "Shift didn't found")
+            @ApiResponse(responseCode = "404", description = "Shift didn't found"),
+            @ApiResponse(responseCode = "403", description = "Access forbidden"),
+            @ApiResponse(responseCode = "401", description = "Request not authenticated")
     })
     @DeleteMapping("/{providerId}/delete/{shiftId}")
     public ResponseEntity<Void> delete(
@@ -113,5 +126,20 @@ public class ShiftController {
             return ResponseEntity.ok().build();
 
         return ResponseEntity.badRequest().build();
+    }
+
+
+    @Operation(summary = "Gets shifts from the context's Provider")
+    @ApiResponse(
+            responseCode = "200",
+            description = "List of Provider's shifts",
+            content =  @Content(
+                    mediaType = "application/json",
+                    schema = @Schema(implementation = ShiftDTO.class)
+            )
+    )
+    @GetMapping("/me")
+    public ResponseEntity<List<ShiftDTO>> getMe() {
+        return ResponseEntity.ok(service.getMe());
     }
 }
