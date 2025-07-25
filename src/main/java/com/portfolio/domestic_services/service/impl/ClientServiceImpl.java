@@ -42,6 +42,7 @@ public class ClientServiceImpl implements ClientService {
         userService.checkFieldsUniquenessOnUpdate(newType.getId(), newType.getEmail(), newType.getPhoneNumber(), newType.getUsername());
 
         newType.setRole(Roles.CLIENT); // by default, when updating a new Client, its role is CLIENT
+        newType.setPassword(passwordEncoder.encode(newType.getPassword()));
 
         Client updated = repository.save(mapper.toEntity(newType));
         return Optional.of(mapper.toDto(updated)); // Spring JPA manages automatically the update

@@ -2,7 +2,6 @@ package com.portfolio.domestic_services.service.impl;
 
 import com.portfolio.domestic_services.dto.UserDTO;
 import com.portfolio.domestic_services.mappers.UserMapper;
-import com.portfolio.domestic_services.model.Roles;
 import com.portfolio.domestic_services.model.User;
 import com.portfolio.domestic_services.repository.UserRepository;
 import com.portfolio.domestic_services.service.UserService;
@@ -23,19 +22,6 @@ public class UserServiceImpl implements UserService {
     @Autowired private PasswordEncoder passwordEncoder;
 
     @Override
-    public Optional<UserDTO> create(UserDTO dto) throws UniquenessViolationException {
-        checkFieldsUniquenessOnCreate(dto.getEmail(), dto.getPhoneNumber(), dto.getUsername());
-
-        dto.setRole(Roles.USER); // by default, when creating a new User, its default role is USER
-        dto.setPassword(passwordEncoder.encode(dto.getPassword()));
-
-        User entity = mapper.toEntity(dto);
-        User saved = repository.save(entity);
-
-        return Optional.of(mapper.toDto(saved));
-    }
-
-    @Override
     public Optional<UserDTO> getById(Long id) {
         Optional<User> userOpt = repository.findById(id);
 
@@ -53,9 +39,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Optional<UserDTO> update(UserDTO dto) throws UniquenessViolationException {
-        checkFieldsUniquenessOnUpdate(dto.getId(), dto.getEmail(), dto.getPhoneNumber(), dto.getUsername());
+        // these lines prevent from changing the role of the user (since it's not allowed to change its role)
+        Optional<UserDTO> userOpt = getById(dto.getId());
+        userOpt.ifPresent(userDTO -> dto.setRole(userDTO.getRole()));
 
-        dto.setRole(Roles.USER); // by default, when updating a User, its default role is USER
+        checkFieldsUniquenessOnUpdate(dto.getId(), dto.getEmail(), dto.getPhoneNumber(), dto.getUsername());
 
         User entity = mapper.toEntity(dto);
         User saved = repository.save(entity);

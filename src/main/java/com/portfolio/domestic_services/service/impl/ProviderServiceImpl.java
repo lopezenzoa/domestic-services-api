@@ -30,6 +30,7 @@ public class ProviderServiceImpl implements ProviderService {
     @Override
     public Optional<ProviderDTO> create(ProviderDTO dto) throws UniquenessViolationException {
         userService.checkFieldsUniquenessOnCreate(dto.getEmail(), dto.getPhoneNumber(), dto.getUsername());
+        checkLicenseNumberUniquenessOnCreate(dto.getLicenseNumber());
 
         dto.setRole(Roles.PROVIDER); // by default, when creating a Provider, its role is PROVIDER
         dto.setPassword(passwordEncoder.encode(dto.getPassword()));
@@ -48,10 +49,20 @@ public class ProviderServiceImpl implements ProviderService {
     @Override
     public Optional<ProviderDTO> update(ProviderDTO dto) throws UniquenessViolationException {
         userService.checkFieldsUniquenessOnUpdate(dto.getId(), dto.getEmail(), dto.getPhoneNumber(), dto.getUsername());
+        checkLicenseNumberUniquenessOnUpdate(dto.getId(), dto.getLicenseNumber());
 
         dto.setRole(Roles.PROVIDER); // by default, when updating a Provider, its role is PROVIDER
+        dto.setPassword(passwordEncoder.encode(dto.getPassword()));
 
-        Provider updated = repository.save(mapper.toEntity(dto));
+        Provider provider = mapper.toEntity(dto);
+
+        Optional<FacilityDTO> facilityOpt = facilityService.findByName(dto.getFacility().getName());
+
+        // here, if the facility is found, then I have to map it to an entity in order to set it to the provider
+        facilityOpt.ifPresent(facilityDto -> provider.setFacility(facilityService.mapToEntity(facilityDto)));
+
+        Provider updated = repository.save(provider);
+
         return Optional.of(mapper.toDto(updated)); // Spring JPA manages automatically the update
     }
 
@@ -92,5 +103,24 @@ public class ProviderServiceImpl implements ProviderService {
             return getById(userOpt.get().getId());
 
         return Optional.empty();
+    }
+
+    private void checkLicenseNumberUniquenessOnCreate(String licenseNumber) {
+        boolean anyMatch = getAll().stream().anyMatch(provider -> provider.getLicenseNumber().equals(licenseNumber));
+
+        if (anyMatch)
+            throw new UniquenessViolationException("I'm sorry but that license number is already registered");
+    }
+
+    private void checkLicenseNumberUniquenessOnUpdate(Long providerId, String licenseNumber) {
+        List<ProviderDTO> filteredProviders = getAll()
+                .stream()
+                .filter(provider -> !provider.getId().equals(providerId))
+                .toList();
+
+        boolean anyMatch = filteredProviders.stream().anyMatch(provider -> provider.getLicenseNumber().equals(licenseNumber));
+
+        if (anyMatch)
+            throw new UniquenessViolationException("I'm sorry but that license number was registered by another provider");
     }
 }

@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Optional;
 
 public interface UserService {
-    Optional<UserDTO> create(UserDTO dto) throws UniquenessViolationException;
     Optional<UserDTO> getById(Long id);
     List<UserDTO> getAll();
     Optional<UserDTO> update(UserDTO dto) throws UniquenessViolationException ;
