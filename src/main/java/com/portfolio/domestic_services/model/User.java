@@ -34,9 +34,10 @@ public class User {
     @Column(nullable = false, length = 40, unique = true)
     private String email;
 
-    @Column(unique = true)
+    @Column(unique = true, nullable = false)
     private String username;
 
+    @Column(nullable = false)
     private String password;
 
     @Enumerated(EnumType.STRING)
