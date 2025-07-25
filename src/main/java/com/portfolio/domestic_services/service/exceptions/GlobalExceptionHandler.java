@@ -72,7 +72,7 @@ public class GlobalExceptionHandler {
         error.setTimestamp(LocalDateTime.now());
         error.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
         error.setError("Internal Server Error");
-        error.setMessage("There was an expected error");
+        error.setMessage(exception.getMessage());
         error.setPath(request.getRequestURI());
 
         return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
