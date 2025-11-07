@@ -10,5 +10,8 @@ public interface FacilityService {
     Optional<FacilityDTO> create(FacilityDTO dto);
     List<FacilityDTO> getAll();
     Optional<FacilityDTO> findByName(String name);
+    Optional<FacilityDTO> getById(Long id);
+    Optional<FacilityDTO> update(FacilityDTO dto);
+    boolean delete(Long id);
     Facility mapToEntity(FacilityDTO dto);
 }

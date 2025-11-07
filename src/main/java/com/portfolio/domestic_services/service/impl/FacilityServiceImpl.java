@@ -1,8 +1,10 @@
 package com.portfolio.domestic_services.service.impl;
 
 import com.portfolio.domestic_services.dto.FacilityDTO;
+import com.portfolio.domestic_services.dto.UserDTO;
 import com.portfolio.domestic_services.mappers.FacilityMapper;
 import com.portfolio.domestic_services.model.Facility;
+import com.portfolio.domestic_services.model.User;
 import com.portfolio.domestic_services.repository.FacilityRepository;
 import com.portfolio.domestic_services.service.FacilityService;
 import com.portfolio.domestic_services.service.exceptions.ResourceNotFoundException;
@@ -44,6 +46,26 @@ public class FacilityServiceImpl implements FacilityService {
     }
 
     @Override
+    public Optional<FacilityDTO> getById(Long id) {
+        Optional<Facility> facilityOpt = repository.findById(id);
+
+        if (facilityOpt.isEmpty())
+            throw new ResourceNotFoundException("I'm sorry, but the facility with ID: " + id + " was not found");
+
+        return Optional.of(mapper.toDto(facilityOpt.get()));
+    }
+
+    @Override
+    public Optional<FacilityDTO> update(FacilityDTO dto) throws UniquenessViolationException {
+        checkUniquenessOnUpdate(dto.getId(), dto.getName()); // This is to avoid replacing by another facility with the same name
+
+        Facility entity = mapper.toEntity(dto);
+        Facility saved = repository.save(entity);
+
+        return Optional.of(mapper.toDto(saved));
+    }
+
+    @Override
     public Facility mapToEntity(FacilityDTO dto) {
         return mapper.toEntity(dto);
     }
@@ -53,5 +75,28 @@ public class FacilityServiceImpl implements FacilityService {
 
         if (exists)
             throw new UniquenessViolationException("I'm sorry but there's already another facility with the name: " + name);
+    }
+
+    private void checkUniquenessOnUpdate(Long id, String name) {
+        List<FacilityDTO> filteredFacilities = getAll()
+                .stream()
+                .filter(facility -> !facility.getId().equals(id))
+                .toList();
+
+        boolean exists = filteredFacilities
+                .stream()
+                .anyMatch(facility -> facility.getName().equalsIgnoreCase(name));
+
+        if (exists)
+            throw new UniquenessViolationException("I'm sorry but there's already another facility with the name: " + name);
+    }
+
+    @Override
+    public boolean delete(Long id) {
+        if (!repository.existsById(id))
+            throw new ResourceNotFoundException("I'm sorry, but the facility with ID: " + id + " was not found");
+
+        repository.deleteById(id);
+        return true;
     }
 }

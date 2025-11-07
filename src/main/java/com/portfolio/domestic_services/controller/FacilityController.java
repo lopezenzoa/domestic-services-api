@@ -1,7 +1,9 @@
 package com.portfolio.domestic_services.controller;
 
 import com.portfolio.domestic_services.dto.FacilityDTO;
+import com.portfolio.domestic_services.dto.FacilityDTO;
 import com.portfolio.domestic_services.service.FacilityService;
+import com.portfolio.domestic_services.service.exceptions.UniquenessViolationException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -82,5 +84,67 @@ public class FacilityController {
     ) {
         Optional<FacilityDTO> facilityOpt = service.findByName(name);
         return facilityOpt.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @Operation(
+            summary = "Get a Facility by its ID",
+            description = "Returns a Facility data"
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Facility data",
+                    content =  @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = FacilityDTO.class)
+                    )
+            ),
+            @ApiResponse(responseCode = "404", description = "Facility not found"),
+            @ApiResponse(responseCode = "403", description = "Access forbidden"),
+            @ApiResponse(responseCode = "401", description = "Request not authenticated")
+    })
+    @GetMapping("/{id}")
+    public ResponseEntity<FacilityDTO> getById(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "ID of the Facility searched")
+            @PathVariable Long id
+    ) {
+        Optional<FacilityDTO> facilityOpt = service.getById(id);
+        return facilityOpt.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @Operation(summary = "Update a Facility")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Facility updated"),
+            @ApiResponse(responseCode = "400", description = "Invalid Facility data"),
+            @ApiResponse(responseCode = "403", description = "Access forbidden"),
+            @ApiResponse(responseCode = "401", description = "Request not authenticated")
+    })
+    @PutMapping("/update")
+    public ResponseEntity<FacilityDTO> update(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Facility data needed to update")
+            @RequestBody FacilityDTO body
+    ) throws UniquenessViolationException {
+        Optional<FacilityDTO> facilityOpt = service.update(body);
+        return facilityOpt.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.badRequest().build());
+    }
+
+    @Operation(summary = "Delete a specific Facility")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Facility deleted"),
+            @ApiResponse(responseCode = "404", description = "Facility didn't found"),
+            @ApiResponse(responseCode = "403", description = "Access forbidden"),
+            @ApiResponse(responseCode = "401", description = "Request not authenticated")
+    })
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<Void> delete(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "ID of the Facility that will be deleted")
+            @PathVariable Long id
+    ) {
+        boolean deleted = service.delete(id);
+
+        if (deleted)
+            return ResponseEntity.ok().build();
+
+        return ResponseEntity.notFound().build();
     }
 }
