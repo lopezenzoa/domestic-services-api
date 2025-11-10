@@ -27,7 +27,11 @@ public class Facility {
     @Column(length = 100)
     private String description;
 
-    @OneToMany(mappedBy = "facility")
+    @OneToMany(
+            mappedBy = "facility",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
     @JsonIgnore
     private List<Provider> providers;
 }
