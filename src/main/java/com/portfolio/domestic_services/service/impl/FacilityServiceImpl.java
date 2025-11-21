@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class FacilityServiceImpl implements FacilityService {
@@ -30,9 +31,25 @@ public class FacilityServiceImpl implements FacilityService {
         return Optional.of(mapper.toDto(saved));
     }
 
+    // ❗ CORRECCIÓN: Método getAll con filtro implementado ❗
     @Override
-    public List<FacilityDTO> getAll() {
-        return mapper.toDtoList(repository.findAll());
+    public List<FacilityDTO> getAll(String query) {
+        List<FacilityDTO> facilities = mapper.toDtoList(repository.findAll());
+
+        if (query != null && !query.trim().isEmpty()) {
+            final String lowerCaseQuery = query.toLowerCase().trim();
+
+            // Filtramos la lista de DTOs por nombre o descripción que contenga el query
+            return facilities.stream()
+                    .filter(facility ->
+                            facility.getName().toLowerCase().contains(lowerCaseQuery) ||
+                                    (facility.getDescription() != null && facility.getDescription().toLowerCase().contains(lowerCaseQuery))
+                    )
+                    .collect(Collectors.toList());
+        }
+
+        // Si no hay query, devuelve la lista completa
+        return facilities;
     }
 
     @Override
@@ -57,7 +74,7 @@ public class FacilityServiceImpl implements FacilityService {
 
     @Override
     public Optional<FacilityDTO> update(FacilityDTO dto) throws UniquenessViolationException {
-        checkUniquenessOnUpdate(dto.getId(), dto.getName()); // This is to avoid replacing by another facility with the same name
+        checkUniquenessOnUpdate(dto.getId(), dto.getName());
 
         Facility entity = mapper.toEntity(dto);
         Facility saved = repository.save(entity);
@@ -78,7 +95,8 @@ public class FacilityServiceImpl implements FacilityService {
     }
 
     private void checkUniquenessOnUpdate(Long id, String name) {
-        List<FacilityDTO> filteredFacilities = getAll()
+        // Usamos getAll(null) para obtener la lista completa sin filtro
+        List<FacilityDTO> filteredFacilities = getAll(null)
                 .stream()
                 .filter(facility -> !facility.getId().equals(id))
                 .toList();

@@ -8,7 +8,7 @@ import java.util.Optional;
 
 public interface FacilityService {
     Optional<FacilityDTO> create(FacilityDTO dto);
-    List<FacilityDTO> getAll();
+    List<FacilityDTO> getAll(String query);
     Optional<FacilityDTO> findByName(String name);
     Optional<FacilityDTO> getById(Long id);
     Optional<FacilityDTO> update(FacilityDTO dto);
