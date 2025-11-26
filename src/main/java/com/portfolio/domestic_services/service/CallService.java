@@ -4,7 +4,7 @@ import com.portfolio.domestic_services.dto.CallDTO;
 
 import java.util.List;
 import java.util.Optional;
-
+import org.springframework.data.domain.Page;
 public interface CallService {
     Optional<CallDTO> request(CallDTO dto);
     List<CallDTO> getAll();
@@ -15,6 +15,7 @@ public interface CallService {
     boolean accept(Long providerId, Long callId);
     boolean decline(Long providerId, Long callId);
     boolean delete(Long id);
+    Page<CallDTO> getPaginatedByProvider(Long providerId, int page, int size);
 
     List<CallDTO> getMe();
 }
