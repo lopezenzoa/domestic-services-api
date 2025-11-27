@@ -17,4 +17,7 @@ public class CallDTO {
     private String state;
     private ClientDTO client;
     private ProviderDTO provider;
+    private Double cost;
+    private String review;
+
 }

@@ -137,6 +137,35 @@ public class CallServiceImpl implements CallService {
         log.info("=== VISITA ACEPTADA CORRECTAMENTE ===");
         return true;
     }
+    @Override
+    public Optional<CallDTO> getProviderCallDetail(Long providerId, Long callId) {
+
+        Call call = repository.findById(callId)
+                .orElseThrow(() -> new ResourceNotFoundException("Call not found"));
+
+        // Validar que la visita pertenezca a ese provider
+        if (!call.getProvider().getId().equals(providerId))
+            throw new IllegalStateException("This call does not belong to this provider");
+
+        // Retornamos TODA la info ampliada (DTO ya contiene cliente, costo, review, etc.)
+        return Optional.of(mapper.toDto(call));
+    }
+    public boolean finish(Long providerId, Long callId) {
+        Optional<Call> callOpt = repository.findById(callId);
+
+        if (callOpt.isEmpty()) return false;
+
+        Call call = callOpt.get();
+
+        // Solo puede finalizarlo el prestador dueño
+        if (!call.getProvider().getId().equals(providerId)) return false;
+
+        call.setState(States.FINISHED);
+        repository.save(call);
+
+        return true;
+    }
+
 
     @Override
     public boolean decline(Long providerId, Long callId) {
