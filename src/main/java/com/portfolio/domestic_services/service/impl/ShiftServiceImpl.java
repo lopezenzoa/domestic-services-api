@@ -134,20 +134,22 @@ public class ShiftServiceImpl implements ShiftService {
     // this method assumes the Shift is present in the Provider's list of shifts and it's available
     @Override
     public void takeShiftOfProvider(Long providerId, LocalDateTime shiftDate) {
+
         List<ShiftDTO> providerShifts = getAllByProviderId(providerId);
 
         String shiftDateString = shiftDate.toString();
 
         ShiftDTO filteredShift = providerShifts.stream()
-                .filter(shift -> shift.getDateTime().equals(shiftDateString)) // filtering all with the same date
-                .filter(ShiftDTO::getAvailable) // filtering all available
-                .toList()
-                .getFirst(); // after filtering, the list of shifts would reduce to one element
+                .filter(shift -> shift.getDateTime().equals(shiftDateString))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("No se encontró un shift para esa fecha"));
 
-        filteredShift.setAvailable(false); // taking the shift
+        filteredShift.setAvailable(false);
 
         update(filteredShift, providerId);
     }
+
+
 
     @Override
     public List<ShiftDTO> getMe() {

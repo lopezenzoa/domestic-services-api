@@ -103,21 +103,38 @@ public class CallServiceImpl implements CallService {
 
     @Override
     public boolean accept(Long providerId, Long callId) {
-        List<CallDTO> providerCalls = getAllRequestedByProvider(providerId);
 
-        Optional<Call> callOpt = getById(callId);
+        log.info("=== ACEPTANDO VISITA ===");
+        log.info("ProviderId recibido: " + providerId);
+        log.info("CallId recibido: " + callId);
 
-        // this condition means: if the provider has no calls associated or the call was not found, return false
-        if (providerCalls.isEmpty() || callOpt.isEmpty())
-            throw new EmptyCollectionException("The provider hasn't any requested call to accept");
+        Call call = getById(callId)
+                .orElseThrow(() -> new ResourceNotFoundException("Call not found"));
 
-        // updating the Shift of the Provider to do it unavailable for other calls
-        shiftService.takeShiftOfProvider(providerId, callOpt.get().getDate());
+        log.info("Call encontrada pertenece al provider: " + call.getProvider().getId());
+        log.info("Estado actual de la visita: " + call.getState());
 
-        Call call = callOpt.get(); // this is the call before updated
-        call.setState(States.PENDING); // this means that the call was accepted
+        // Validar que la visita pertenece al prestador logueado
+        if (!call.getProvider().getId().equals(providerId)) {
+            log.error("ERROR: La visita NO pertenece a este provider");
+            throw new IllegalStateException("This call does not belong to this provider");
+        }
 
-        repository.save(call); // updating the call on db
+        // Solo se aceptan visitas REQUESTING
+        if (!call.getState().equals(States.REQUESTING)) {
+            log.error("ERROR: No se puede aceptar porque el estado no es REQUESTING");
+            throw new IllegalStateException("Only REQUESTING calls can be accepted");
+        }
+
+        // Tomar el turno
+        log.info("Turno válido, tomando shift...");
+        shiftService.takeShiftOfProvider(providerId, call.getDate());
+
+        // Cambiar estado
+        call.setState(States.PENDING);
+        repository.save(call);
+
+        log.info("=== VISITA ACEPTADA CORRECTAMENTE ===");
         return true;
     }
 
@@ -169,4 +186,25 @@ public class CallServiceImpl implements CallService {
 
         return callOpt;
     }
+    @Override
+    public Page<CallDTO> getProviderHistory(Long providerId, int page, int size) {
+
+        List<States> allowedStates = List.of(
+                States.REQUESTING,
+                States.PENDING,
+                States.FINISHED,
+                States.DECLINED
+        );
+
+
+
+        Pageable pageable = PageRequest.of(page, size);
+
+        Page<Call> calls = repository.findByProviderIdAndStateIn(providerId, allowedStates, pageable);
+
+        return calls.map(mapper::toDto);
+
+    }
+
+
 }
