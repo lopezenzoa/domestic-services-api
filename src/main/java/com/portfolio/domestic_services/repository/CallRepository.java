@@ -13,4 +13,6 @@ public interface CallRepository extends JpaRepository<Call, Long> {
     List<Call> findAllByStateAndProviderId(States state, Long id);
 
     Page<Call> findAllByProviderId(Long id, Pageable pageable);
+    Page<Call> findByProviderIdAndStateIn(Long providerId, List<States> states, Pageable pageable);
+
 }

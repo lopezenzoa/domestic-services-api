@@ -146,8 +146,10 @@ public class CallController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
-        return ResponseEntity.ok(service.getPaginatedByProvider(id, page, size));
+        return ResponseEntity.ok(service.getProviderHistory(id, page, size));
     }
+
+
 
     @PutMapping("/provider/{providerId}/accept/{callId}")
     public ResponseEntity<Void> acceptCall(

@@ -16,6 +16,7 @@ public interface CallService {
     boolean decline(Long providerId, Long callId);
     boolean delete(Long id);
     Page<CallDTO> getPaginatedByProvider(Long providerId, int page, int size);
+    Page<CallDTO> getProviderHistory(Long providerId, int page, int size);
 
     List<CallDTO> getMe();
 }
