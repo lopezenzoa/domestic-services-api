@@ -8,6 +8,8 @@ import org.springframework.data.domain.Page;
 public interface CallService {
     Optional<CallDTO> request(CallDTO dto);
     List<CallDTO> getAll();
+    Optional<CallDTO> getProviderCallDetail(Long providerId, Long callId);
+    boolean finish(Long providerId, Long callId);
 
     List<CallDTO> getAllByClient(Long clientId);
     List<CallDTO> getAllByProvider(Long providerId);

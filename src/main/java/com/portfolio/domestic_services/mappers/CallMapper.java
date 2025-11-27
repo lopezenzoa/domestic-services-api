@@ -23,7 +23,9 @@ public class CallMapper {
                 entity.getAddress(),
                 entity.getState().toString(),
                 clientMapper.toDto(entity.getClient()),
-                providerMapper.toDto(entity.getProvider())
+                providerMapper.toDto(entity.getProvider()),
+                entity.getCost(),
+                entity.getReview()
         );
     }
 
@@ -40,14 +42,21 @@ public class CallMapper {
     }
 
     public Call toEntity(CallDTO dto) {
-        return new Call(
-                dto.getId(),
-                dto.getDescription(),
-                LocalDateTime.parse(dto.getDate()),
-                dto.getAddress(),
-                States.valueOf(dto.getState()),
-                clientMapper.toEntity(dto.getClient()),
-                providerMapper.toEntity(dto.getProvider())
-        );
+        Call call = new Call();
+
+        call.setId(dto.getId());
+        call.setDescription(dto.getDescription());
+        call.setDate(LocalDateTime.parse(dto.getDate()));
+        call.setAddress(dto.getAddress());
+        call.setState(States.valueOf(dto.getState()));
+
+        if (dto.getClient() != null)
+            call.setClient(clientMapper.toEntity(dto.getClient()));
+
+        if (dto.getProvider() != null)
+            call.setProvider(providerMapper.toEntity(dto.getProvider()));
+
+        return call;
     }
+
 }

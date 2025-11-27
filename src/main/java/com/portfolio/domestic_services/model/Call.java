@@ -33,6 +33,12 @@ public class Call {
     @Column(nullable = false)
     private States state;
 
+    @Column
+    private Double cost;
+
+    @Column
+    private String review;
+
     @ManyToOne
     @JoinColumn(name = "client_id")
     private Client client;

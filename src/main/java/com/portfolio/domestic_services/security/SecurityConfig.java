@@ -91,6 +91,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PUT, "/api/providers/shifts/**").hasRole("PROVIDER")
                         .requestMatchers(HttpMethod.DELETE, "/api/providers/shifts/**").hasAnyRole("ADMIN", "PROVIDER")
 
+                        .requestMatchers(HttpMethod.PUT, "/api/providers/*/calls/*/finish").hasRole("PROVIDER")
                         // Providers
                         .requestMatchers("/api/providers/me").hasRole("PROVIDER")
                         .requestMatchers(HttpMethod.GET,"/api/providers/**").authenticated()

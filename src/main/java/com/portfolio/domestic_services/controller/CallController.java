@@ -207,6 +207,36 @@ public class CallController {
 
         return ResponseEntity.notFound().build();
     }
+    @Operation(summary = "Mark a specific Call as finished")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Call marked as finished"),
+            @ApiResponse(responseCode = "400", description = "Invalid path variables"),
+            @ApiResponse(responseCode = "403", description = "Access forbidden"),
+            @ApiResponse(responseCode = "401", description = "Request not authenticated")
+    })
+    @PutMapping("/provider/{providerId}/finish/{callId}")
+    public ResponseEntity<Void> finishCall(
+            @PathVariable Long providerId,
+            @PathVariable Long callId
+    ) {
+        boolean finished = service.finish(providerId, callId);
+
+        if (finished)
+            return ResponseEntity.ok().build();
+
+        return ResponseEntity.badRequest().build();
+    }
+
+    @GetMapping("/provider/{providerId}/detail/{callId}")
+    public ResponseEntity<CallDTO> getCallDetail(
+            @PathVariable Long providerId,
+            @PathVariable Long callId
+    ) {
+        Optional<CallDTO> result = service.getProviderCallDetail(providerId, callId);
+
+        return result.map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
 
     @Operation(summary = "Gets calls from the context's User")
     @ApiResponses({
