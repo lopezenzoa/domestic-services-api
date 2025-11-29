@@ -30,44 +30,62 @@ public class ShiftServiceImpl implements ShiftService {
     public Optional<ShiftDTO> create(ShiftDTO dto, Long providerId) {
         Shift entity = mapper.toEntity(dto);
 
-        // searching the provider on db to append the shift
         Optional<ProviderDTO> providerOpt = providerService.getById(providerId);
         providerOpt.ifPresent(provider -> entity.setProvider(providerService.mapToEntity(provider)));
 
-        // validating the date and time of the shift
-        boolean isDateUnique = authenticateDateOnCreate(providerId, LocalDateTime.parse(dto.getDateTime()));
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime fechaTurno = LocalDateTime.parse(dto.getDateTime());
 
-        // the date and time is not unique, so I abort the operation
-        if (!isDateUnique)
-            throw new UniquenessViolationException("I'm sorry but that datetime is already assigned");;
+        // Bloquear turnos pasados
+        if (fechaTurno.isBefore(now)) {
+            throw new UniquenessViolationException("No podés crear un turno en una fecha pasada.");
+        }
+
+        //  Validar que no esté repetida
+        boolean isDateUnique = authenticateDateOnCreate(providerId, fechaTurno);
+        if (!isDateUnique) {
+            throw new UniquenessViolationException("I'm sorry but that datetime is already assigned");
+        }
 
         Shift saved = repository.save(entity);
-
         return Optional.of(mapper.toDto(saved));
     }
 
+
     @Override
     public Optional<ShiftDTO> update(ShiftDTO newDto, Long providerId) {
+
         Shift entity = mapper.toEntity(newDto);
 
-        // searching the provider on db to append the shift
+        // Vincular provider
         Optional<ProviderDTO> providerOpt = providerService.getById(providerId);
         providerOpt.ifPresent(provider -> entity.setProvider(providerService.mapToEntity(provider)));
 
-        // validating the date and time of the shift
-        boolean isDateUnique = authenticateDateOnUpdate(providerId, LocalDateTime.parse(newDto.getDateTime()), newDto.getId());
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime fechaTurno = LocalDateTime.parse(newDto.getDateTime());
 
-        // validating that the shift is already associated with the provider
+        //  1. Validar fecha pasada
+        if (fechaTurno.isBefore(now)) {
+            throw new UniquenessViolationException("No podés modificar un turno a una fecha pasada.");
+        }
+
+        //  2. Validar que el turno efectivamente pertenece al provider
         Optional<Shift> shiftOpt = repository.findByIdAndProviderId(entity.getId(), providerId);
+        if (shiftOpt.isEmpty()) {
+            throw new UniquenessViolationException("Este turno no pertenece al prestador.");
+        }
 
-        // the date and time is not unique, so I abort the operation
-        if (!isDateUnique || shiftOpt.isEmpty())
-            throw new UniquenessViolationException("I'm sorry but that datetime is already assigned");;
+        //  3. Validar unicidad de fecha-horario para ese provider
+        boolean isDateUnique = authenticateDateOnUpdate(providerId, fechaTurno, newDto.getId());
+        if (!isDateUnique) {
+            throw new UniquenessViolationException("Ya existe un turno en ese horario.");
+        }
 
+        // Actualizar
         Shift updated = repository.save(entity);
-
         return Optional.of(mapper.toDto(updated));
     }
+
 
     @Override
     public List<ShiftDTO> getAllByProviderId(Long providerId) {
