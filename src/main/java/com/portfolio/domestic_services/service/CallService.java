@@ -10,6 +10,7 @@ public interface CallService {
     List<CallDTO> getAll();
     Optional<CallDTO> getProviderCallDetail(Long providerId, Long callId);
     boolean finish(Long providerId, Long callId);
+    List<CallDTO> getHistoryForProvider(Long providerId, String state, String start, String end);
 
     List<CallDTO> getAllByClient(Long clientId);
     List<CallDTO> getAllByProvider(Long providerId);

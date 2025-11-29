@@ -18,6 +18,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -100,6 +102,38 @@ public class CallServiceImpl implements CallService {
         List<Call> calls = repository.findAllByStateAndProviderId(States.REQUESTING, id);
         return mapper.toDtoList(calls);
     }
+    @Override
+    public List<CallDTO> getHistoryForProvider(Long providerId, String state, String start, String end) {
+
+        List<CallDTO> all = mapper.toDtoList(repository.findAllByProviderId(providerId));
+
+        // FILTRO POR ESTADO
+        if (state != null && !state.isEmpty()) {
+            all = all.stream()
+                    .filter(c -> c.getState().equalsIgnoreCase(state))
+                    .toList();
+        }
+
+        // FILTRO POR FECHAS (correcto)
+        if (start != null && !start.isEmpty() && end != null && !end.isEmpty()) {
+
+            LocalDate startDate = LocalDate.parse(start);
+            LocalDate endDate   = LocalDate.parse(end);
+
+            LocalDateTime desde = startDate.atStartOfDay();          // 00:00
+            LocalDateTime hasta = endDate.atTime(23, 59, 59);        // 23:59:59
+
+            all = all.stream()
+                    .filter(c -> {
+                        LocalDateTime fecha = LocalDateTime.parse(c.getDate());
+                        return (!fecha.isBefore(desde) && !fecha.isAfter(hasta));
+                    })
+                    .toList();
+        }
+
+        return all;
+    }
+
 
     @Override
     public boolean accept(Long providerId, Long callId) {
