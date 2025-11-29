@@ -56,10 +56,10 @@ public class FacilityController {
             @ApiResponse(responseCode = "401", description = "Request not authenticated")
     })
     @GetMapping("/")
-    public ResponseEntity<List<FacilityDTO>> getAll() {
-        return ResponseEntity.ok(service.getAll());
+    public ResponseEntity<List<FacilityDTO>> getAll(@RequestParam(required = false) String query) {
+        // Pasar el query al servicio
+        return ResponseEntity.ok(service.getAll(query));
     }
-
     @Operation(
             summary = "Get a Facility by its name",
             description = "Returns a Facility data"

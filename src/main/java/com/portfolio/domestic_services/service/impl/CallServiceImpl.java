@@ -12,6 +12,10 @@ import com.portfolio.domestic_services.service.exceptions.ResourceNotFoundExcept
 import com.portfolio.domestic_services.service.exceptions.DateNotAllowedException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -54,6 +58,18 @@ public class CallServiceImpl implements CallService {
 
         return Optional.of(mapper.toDto(saved));
     }
+    @Override
+    public Page<CallDTO> getPaginatedByProvider(Long id, int page, int size) {
+
+        providerService.getById(id); // validar existencia
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by("date").descending());
+
+        Page<Call> calls = repository.findAllByProviderId(id, pageable);
+
+        return calls.map(mapper::toDto);
+    }
+
 
     @Override
     public List<CallDTO> getAll() {
