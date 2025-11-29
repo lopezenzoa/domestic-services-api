@@ -254,4 +254,15 @@ public class CallController {
     public ResponseEntity<List<CallDTO>> getMe() {
         return ResponseEntity.ok(service.getMe());
     }
+    @GetMapping("/provider/history")
+    public ResponseEntity<List<CallDTO>> getHistory(
+            @RequestParam Long providerId,
+            @RequestParam(required = false) String state,
+            @RequestParam(required = false) String start,
+            @RequestParam(required = false) String end
+    ) {
+        List<CallDTO> response = service.getHistoryForProvider(providerId, state, start, end);
+        return ResponseEntity.ok(response);
+    }
+
 }
