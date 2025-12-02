@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -105,6 +106,23 @@ public class ReviewController {
     ) {
         return ResponseEntity.ok(service.getAllByProvider(id));
     }
+    @GetMapping("/my-reviews")
+    public ResponseEntity<Page<ReviewDTO>> getMyReviewsPaged(
+            @RequestParam int page,
+            @RequestParam int size
+    ) {
+        return ResponseEntity.ok(service.getMyReviewsPaged(page, size));
+    }
+
+    @GetMapping("/all")
+    public ResponseEntity<Page<ReviewDTO>> getAllReviewsPaged(
+            @RequestParam int page,
+            @RequestParam int size
+    ) {
+        return ResponseEntity.ok(service.getAllReviewsPaged(page, size));
+    }
+
+
 
     @Operation(summary = "Delete a specific Review")
     @ApiResponses({

@@ -108,16 +108,27 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/providers/**").authenticated()
                         .requestMatchers("/api/providers/**").hasRole("ADMIN")
 
-                        // ============================
-                        //  REVIEWS
-                        // ============================
-                        .requestMatchers("/api/reviews/all").authenticated()
-                        .requestMatchers("/api/reviews/me").hasAnyRole("PROVIDER", "CLIENT")
-                        .requestMatchers(HttpMethod.GET, "/api/reviews/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/api/reviews/**").hasRole("CLIENT")
-                        .requestMatchers(HttpMethod.DELETE, "/api/reviews/**").hasAnyRole("ADMIN", "CLIENT")
+                                // ============================
+                                //  REVIEWS
+                                // ============================
+                                .requestMatchers(HttpMethod.GET, "/api/reviews/all").authenticated()
 
-                        // ============================
+                                .requestMatchers(HttpMethod.GET, "/api/reviews/my-reviews")
+                                .hasAnyRole("CLIENT", "PROVIDER", "ADMIN")
+
+                                .requestMatchers(HttpMethod.GET, "/api/reviews/me")
+                                .hasAnyRole("PROVIDER", "CLIENT")
+
+                                .requestMatchers(HttpMethod.GET, "/api/reviews/**")
+                                .hasRole("ADMIN")
+
+                                .requestMatchers(HttpMethod.POST, "/api/reviews/**")
+                                .hasRole("CLIENT")
+
+                                .requestMatchers(HttpMethod.DELETE, "/api/reviews/**")
+                                .hasAnyRole("ADMIN", "CLIENT")
+
+                                // ============================
                         //  MESSAGES
                         // ============================
                         .requestMatchers("/api/messages/**")
