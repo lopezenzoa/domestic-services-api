@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -199,6 +200,17 @@ public class CallServiceImpl implements CallService {
 
         return true;
     }
+    @Override
+    public Call findById(Long id) {
+        Call call = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Call not found"));
+
+        call.getProvider().getFirstName(); // fuerza la carga del provider
+        call.getClient().getFirstName();   // fuerza la carga del cliente
+
+        return call;
+    }
+
 
 
     @Override
@@ -267,6 +279,22 @@ public class CallServiceImpl implements CallService {
 
         return calls.map(mapper::toDto);
 
+    }
+    @Override
+    public List<ChatListDTO> getMyChats() {
+        UserDTO me = userService.getMe().orElseThrow();
+
+        Long myId = me.getId();
+
+        List<ChatListDTO> clientChats = repository.findChatsByClientId(myId);
+        List<ChatListDTO> providerChats = repository.findChatsByProviderId(myId);
+
+        List<ChatListDTO> allChats = new ArrayList<>();
+
+        if (clientChats != null) allChats.addAll(clientChats);
+        if (providerChats != null) allChats.addAll(providerChats);
+
+        return allChats;
     }
 
 

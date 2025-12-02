@@ -6,10 +6,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
-import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -22,91 +20,114 @@ import java.util.List;
 
 @Configuration
 public class SecurityConfig {
+
     @Autowired private JwtFilter jwtFilter;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(AbstractHttpConfigurer::disable)
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(auth -> auth
-                        // Documentation
+
+                        // ============================
+                        //  PUBLIC ENDPOINTS
+                        // ============================
                         .requestMatchers("/swagger-ui/**").permitAll()
                         .requestMatchers("/v3/api-docs/**").permitAll()
-
-                        // Auth
                         .requestMatchers("/api/auth/**").permitAll()
 
-                        // Users
-                        .requestMatchers("/api/users/me").hasAnyRole("ADMIN", "PROVIDER", "CLIENT")
+                        // ============================
+                        //  USERS
+                        // ============================
+                        .requestMatchers("/api/users/me")
+                        .hasAnyRole("ADMIN", "PROVIDER", "CLIENT")
                         .requestMatchers("/api/users/**").hasRole("ADMIN")
-                        // CALLS ENDPOINTS
-                        // Me
-                        .requestMatchers("/api/calls/me").hasAnyRole("CLIENT", "PROVIDER")
 
-                        // Provider history paginated
-                        .requestMatchers(HttpMethod.GET, "/api/calls/provider/*/history").hasRole("PROVIDER")
+                        // ============================
+                        //  💬 CHATS (CLIENT/PROVIDER)
+                        // ============================
+                        .requestMatchers(HttpMethod.GET, "/api/calls/chats")
+                        .hasAnyRole("CLIENT", "PROVIDER", "ADMIN")
+                        // ============================
+                        //  📞 CALLS
+                        // ============================
+                        .requestMatchers("/api/calls/me")
+                        .hasAnyRole("CLIENT", "PROVIDER")
 
-                        // Provider calls list
-                        .requestMatchers(HttpMethod.GET, "/api/calls/provider/**").hasRole("PROVIDER")
+                        .requestMatchers(HttpMethod.GET, "/api/calls/provider/*/history")
+                        .hasRole("PROVIDER")
 
-                        // Client calls list
-                        .requestMatchers(HttpMethod.GET, "/api/calls/client/**").hasRole("CLIENT")
+                        .requestMatchers(HttpMethod.GET, "/api/calls/provider/**")
+                        .hasRole("PROVIDER")
 
-                        // Admin all calls
-                        .requestMatchers(HttpMethod.GET, "/api/calls/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/calls/client/**")
+                        .hasRole("CLIENT")
 
-                        // Accept / Deny calls
-                        .requestMatchers(HttpMethod.PUT, "/api/calls/**").hasRole("PROVIDER")
+                        .requestMatchers(HttpMethod.GET, "/api/calls/**")
+                        .hasRole("ADMIN")
 
-                        // Create call
-                        .requestMatchers(HttpMethod.POST, "/api/calls/**").hasRole("CLIENT")
-
-                        // Delete call
-                        .requestMatchers(HttpMethod.DELETE, "/api/calls/**").hasRole("ADMIN")
-
-                        // ==========================
-
-                        // Clients
+                        // ============================
+                        //  CLIENTS
+                        // ============================
                         .requestMatchers("/api/clients/me").hasRole("CLIENT")
                         .requestMatchers("/api/clients/**").hasRole("ADMIN")
 
-                        // Facilities
+                        // ============================
+                        //  FACILITIES
+                        // ============================
                         .requestMatchers(HttpMethod.GET, "/api/facilities/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/facilities/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/facilities/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/facilities/**").hasRole("ADMIN")
 
-                        // Flags
+                        // ============================
+                        //  FLAGS
+                        // ============================
                         .requestMatchers("/api/flags/me").hasAnyRole("PROVIDER", "CLIENT")
                         .requestMatchers(HttpMethod.GET, "/api/flags/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/flags/**").hasRole("CLIENT")
                         .requestMatchers(HttpMethod.DELETE, "/api/flags/**").hasAnyRole("ADMIN", "CLIENT")
 
-                        // Shifts
+                        // ============================
+                        //  SHIFTS
+                        // ============================
                         .requestMatchers("/api/providers/shifts/me").hasRole("PROVIDER")
                         .requestMatchers(HttpMethod.POST, "/api/providers/shifts/**").hasRole("PROVIDER")
                         .requestMatchers(HttpMethod.GET, "/api/providers/shifts/**").authenticated()
                         .requestMatchers(HttpMethod.PUT, "/api/providers/shifts/**").hasRole("PROVIDER")
                         .requestMatchers(HttpMethod.DELETE, "/api/providers/shifts/**").hasAnyRole("ADMIN", "PROVIDER")
-
                         .requestMatchers(HttpMethod.PUT, "/api/providers/*/calls/*/finish").hasRole("PROVIDER")
-                        // Providers
+
+                        // ============================
+                        //  PROVIDERS
+                        // ============================
                         .requestMatchers("/api/providers/me").hasRole("PROVIDER")
-                        .requestMatchers(HttpMethod.GET,"/api/providers/**").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/providers/**").authenticated()
                         .requestMatchers("/api/providers/**").hasRole("ADMIN")
 
-                        // Reviews
+                        // ============================
+                        //  REVIEWS
+                        // ============================
                         .requestMatchers("/api/reviews/all").authenticated()
                         .requestMatchers("/api/reviews/me").hasAnyRole("PROVIDER", "CLIENT")
                         .requestMatchers(HttpMethod.GET, "/api/reviews/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/reviews/**").hasRole("CLIENT")
                         .requestMatchers(HttpMethod.DELETE, "/api/reviews/**").hasAnyRole("ADMIN", "CLIENT")
 
+                        // ============================
+                        //  MESSAGES
+                        // ============================
+                        .requestMatchers("/api/messages/**")
+                        .hasAnyRole("CLIENT", "PROVIDER", "ADMIN")
+
+                        // ============================
+                        //  RESTO
+                        // ============================
                         .anyRequest().authenticated()
                 );
-
 
         return http.build();
     }

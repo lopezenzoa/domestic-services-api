@@ -1,7 +1,12 @@
 package com.portfolio.domestic_services.controller;
 
 import com.portfolio.domestic_services.dto.CallDTO;
+import com.portfolio.domestic_services.dto.ChatListDTO;
+import com.portfolio.domestic_services.mappers.CallMapper;
+import com.portfolio.domestic_services.model.Call;
+import com.portfolio.domestic_services.model.User;
 import com.portfolio.domestic_services.service.CallService;
+import com.portfolio.domestic_services.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -9,19 +14,29 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.core.Authentication;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/calls")
+
 @Tag(name = "Calls", description = "Operations for calls")
 public class CallController {
     @Autowired private CallService service;
+    @Autowired
+    private UserService userService;
+    @Autowired
+    private CallMapper mapper;
 
     @Operation(summary = "Request a new Call of a Provider")
     @ApiResponses({
@@ -264,5 +279,36 @@ public class CallController {
         List<CallDTO> response = service.getHistoryForProvider(providerId, state, start, end);
         return ResponseEntity.ok(response);
     }
+    @GetMapping("/client/call/{id}")
+    public ResponseEntity<?> getCallForClient(@PathVariable Long id) {
+
+        // Obtener username autenticado
+        String username = (String) SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getPrincipal();
+
+        // Obtener usuario desde la base
+        User user = userService.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        Long clientId = user.getId();
+
+        // Buscar el turno con relaciones cargadas
+        Call call = service.findById(id);
+
+        // Seguridad: verificar que el turno pertenezca al cliente autenticado
+        if (!call.getClient().getId().equals(clientId)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No puedes ver esta llamada");
+        }
+
+        // DEVOLVER DTO
+        return ResponseEntity.ok(mapper.toDto(call));
+    }
+
+    @GetMapping("/chats")
+    public List<ChatListDTO> getMyChats() {
+        return service.getMyChats();
+    }
+
 
 }
