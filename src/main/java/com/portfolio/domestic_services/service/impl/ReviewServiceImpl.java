@@ -4,7 +4,9 @@ import com.portfolio.domestic_services.dto.*;
 import com.portfolio.domestic_services.mappers.ReviewMapper;
 import com.portfolio.domestic_services.model.Review;
 import com.portfolio.domestic_services.model.Roles;
+import com.portfolio.domestic_services.model.User;
 import com.portfolio.domestic_services.repository.ReviewRepository;
+import com.portfolio.domestic_services.security.UserSecurityService;
 import com.portfolio.domestic_services.service.ClientService;
 import com.portfolio.domestic_services.service.ProviderService;
 import com.portfolio.domestic_services.service.ReviewService;
@@ -12,6 +14,9 @@ import com.portfolio.domestic_services.service.UserService;
 import com.portfolio.domestic_services.service.exceptions.EmptyCollectionException;
 import com.portfolio.domestic_services.service.exceptions.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -25,6 +30,8 @@ public class ReviewServiceImpl implements ReviewService {
     @Autowired private ProviderService providerService;
     @Autowired private ClientService clientService;
     @Autowired private UserService userService;
+    @Autowired
+    private UserSecurityService userSecurityService;
 
     @Override
     public Optional<ReviewDTO> create(ReviewDTO dto) {
@@ -86,4 +93,33 @@ public class ReviewServiceImpl implements ReviewService {
 
         throw new EmptyCollectionException("I'm sorry, you don't have any reviews");
     }
+    @Override
+    public Page<ReviewDTO> getMyReviewsPaged(int page, int size) {
+
+        User me = userSecurityService.getCurrentUser();
+        Pageable pageable = PageRequest.of(page, size);
+
+        Page<Review> reviews;
+
+        if (me.getRole() == Roles.CLIENT) {
+            reviews = repository.findByClientId(me.getId(), pageable);
+        } else if (me.getRole() == Roles.PROVIDER) {
+            reviews = repository.findByProviderId(me.getId(), pageable);
+        } else {
+            throw new EmptyCollectionException("The user does not have reviews.");
+        }
+
+        return reviews.map(mapper::toDto);
+    }
+
+    @Override
+    public Page<ReviewDTO> getAllReviewsPaged(int page, int size) {
+
+        Pageable pageable = PageRequest.of(page, size);
+
+        Page<Review> reviews = repository.findAll(pageable);
+
+        return reviews.map(mapper::toDto);
+    }
+
 }

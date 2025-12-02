@@ -5,6 +5,7 @@ import com.portfolio.domestic_services.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -31,6 +32,14 @@ public class UserSecurityService implements UserDetailsService {
                 .accountLocked(false)
                 .disabled(false)
                 .build()).orElse(null);
+    }
+    public User getCurrentUser() {
+        String username = (String) SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getPrincipal();
+
+        return repository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }
 
     private List<GrantedAuthority> grantedAuthorities(String[] roles) {
