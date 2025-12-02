@@ -7,6 +7,8 @@ import com.portfolio.domestic_services.repository.UserRepository;
 import com.portfolio.domestic_services.service.UserService;
 import com.portfolio.domestic_services.service.exceptions.ResourceNotFoundException;
 import com.portfolio.domestic_services.service.exceptions.UniquenessViolationException;
+import org.springframework.security.core.Authentication;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -97,6 +99,12 @@ public class UserServiceImpl implements UserService {
 
         return userOpt.map(user -> mapper.toDto(user));
     }
+    @Override
+    public Optional<User> findByUsername(String username) {
+        return repository.findByUsername(username);
+    }
+
+
 
     private boolean existsByPhoneNumber(String phoneNumber) {
         return repository.existsByPhoneNumber(phoneNumber);

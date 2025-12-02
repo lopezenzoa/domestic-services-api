@@ -1,7 +1,9 @@
 package com.portfolio.domestic_services.service;
 
 import com.portfolio.domestic_services.dto.UserDTO;
+import com.portfolio.domestic_services.model.User;
 import com.portfolio.domestic_services.service.exceptions.UniquenessViolationException;
+import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
 
 import java.util.List;
 import java.util.Optional;
@@ -11,6 +13,7 @@ public interface UserService {
     List<UserDTO> getAll();
     Optional<UserDTO> update(UserDTO dto) throws UniquenessViolationException ;
     boolean delete(Long id);
+    Optional<User> findByUsername(String username);
 
     void checkFieldsUniquenessOnCreate(String email, String phoneNumber, String username) throws UniquenessViolationException;
     void checkFieldsUniquenessOnUpdate(Long userId, String email, String phoneNumber, String username) throws UniquenessViolationException;
