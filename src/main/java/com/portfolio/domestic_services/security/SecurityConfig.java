@@ -29,15 +29,21 @@ public class SecurityConfig {
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(AbstractHttpConfigurer::disable)
+                .headers(headers -> headers.frameOptions(frame -> frame.disable()))
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(auth -> auth
 
                         // ============================
                         //  PUBLIC ENDPOINTS
                         // ============================
+                        .requestMatchers("/ws-chat").permitAll()
+                        .requestMatchers("/ws-chat/**").permitAll()
+
                         .requestMatchers("/swagger-ui/**").permitAll()
                         .requestMatchers("/v3/api-docs/**").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
+
+
 
                         // ============================
                         //  USERS
@@ -50,6 +56,8 @@ public class SecurityConfig {
                         //  💬 CHATS (CLIENT/PROVIDER)
                         // ============================
                         .requestMatchers(HttpMethod.GET, "/api/calls/chats")
+                        .hasAnyRole("CLIENT", "PROVIDER", "ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/calls/my-chats/**")
                         .hasAnyRole("CLIENT", "PROVIDER", "ADMIN")
                         // ============================
                         //  📞 CALLS

@@ -9,11 +9,10 @@ public class ChatListDTO {
     private String otherUserName;
     private String state;
     private String date;
-
+    private long unreadCount;
     public ChatListDTO() {
     }
-
-    // ✅ CONSTRUCTOR CLAVE: Recibe los tipos REALES de la base de datos (States, LocalDateTime)
+    //  CONSTRUCTOR CLAVE: Recibe los tipos REALES de la base de datos (States, LocalDateTime)
     // Hibernate usará este constructor automáticamente.
     public ChatListDTO(Long id, Long otherUserId, String firstName, String lastName, States state, LocalDateTime date) {
         this.id = id;
@@ -40,4 +39,11 @@ public class ChatListDTO {
 
     public String getDate() { return date; }
     public void setDate(String date) { this.date = date; }
+    public long getUnreadCount() {
+        return unreadCount;
+    }
+
+    public void setUnreadCount(long unreadCount) {
+        this.unreadCount = unreadCount;
+    }
 }
