@@ -19,6 +19,8 @@ public interface CallRepository extends JpaRepository<Call, Long> {
 
     Page<Call> findAllByProviderId(Long id, Pageable pageable);
     Page<Call> findByProviderIdAndStateIn(Long providerId, List<States> states, Pageable pageable);
+    @Query("SELECT c FROM Call c WHERE c.client.id = :userId OR c.provider.id = :userId")
+    List<Call> findCallsByUserId(@Param("userId") Long userId);
     @Query("""
     SELECT new com.portfolio.domestic_services.dto.ChatListDTO(
         c.id,
