@@ -34,35 +34,50 @@ public class MessageServiceImpl implements MessageService {
 
     @Override
     public List<ChatListDTO> getChatsByUser(Long userId) {
+
+        // 1. Traer todas las calls del usuario
         List<Call> calls = callRepo.findCallsByUserId(userId);
-        List<ChatListDTO> dtos = new ArrayList<>();
+
+        List<ChatListDTO> result = new ArrayList<>();
 
         for (Call call : calls) {
-            //  CORREGIDO: countByCall_Id... (con guion bajo)
-            long unread = repo.countByCall_IdAndAuthorIdNotAndSeenFalse(call.getId(), userId);
 
-            User otherUser;
-            if (call.getClient().getId().equals(userId)) {
-                otherUser = call.getProvider();
-            } else {
-                otherUser = call.getClient();
+            // 2. Traer el último mensaje (si no existe, NO ES CHAT → lo saltamos)
+            Message last = repo.findTopByCall_IdOrderByTimestampDesc(call.getId());
+            if (last == null) {
+                continue; // salteamos visitas sin mensajes → opción B
             }
 
-            ChatListDTO dto = new ChatListDTO(
-                    call.getId(),
-                    otherUser.getId(),
-                    otherUser.getFirstName(),
-                    otherUser.getLastName(),
-                    call.getState(),
-                    call.getDate()
-            );
+            // 3. Crear DTO
+            ChatListDTO dto = new ChatListDTO();
+            dto.setId(call.getId());
 
+
+            // Quién es el otro usuario según el rol
+            User otherUser = call.getClient().getId().equals(userId)
+                    ? call.getProvider()
+                    : call.getClient();
+
+            dto.setOtherUserName(otherUser.getFirstName() + " " + otherUser.getLastName());
+
+            // 4. Último mensaje
+            dto.setLastMessage(last.getContent());
+            dto.setLastMessageTime(last.getTimestamp().toString());
+
+            // 5. Mensajes no leídos
+            long unread = repo.countByCall_IdAndAuthorIdNotAndSeenFalse(call.getId(), userId);
             dto.setUnreadCount(unread);
-            dtos.add(dto);
+
+            // agregar a la lista final
+            result.add(dto);
         }
 
-        return dtos;
+        return result;
     }
+
+
+
+
 
     @Override
     public Message send(MessageDTO dto) {
@@ -91,4 +106,5 @@ public class MessageServiceImpl implements MessageService {
 
         repo.saveAll(unreadMessages);
     }
+
 }
