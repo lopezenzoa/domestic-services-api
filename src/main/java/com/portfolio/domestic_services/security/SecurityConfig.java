@@ -1,5 +1,6 @@
 package com.portfolio.domestic_services.security;
 
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -30,12 +31,15 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(AbstractHttpConfigurer::disable)
                 .headers(headers -> headers.frameOptions(frame -> frame.disable()))
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint((req, res, authEx) -> {
+                            res.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Credenciales incorrectas");
+                        })
+                )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(auth -> auth
 
-                        // ============================
-                        //  PUBLIC ENDPOINTS
-                        // ============================
+
                         .requestMatchers("/ws-chat").permitAll()
                         .requestMatchers("/ws-chat/**").permitAll()
 
@@ -45,23 +49,17 @@ public class SecurityConfig {
 
 
 
-                        // ============================
-                        //  USERS
-                        // ============================
+
                         .requestMatchers("/api/users/me")
                         .hasAnyRole("ADMIN", "PROVIDER", "CLIENT")
                         .requestMatchers("/api/users/**").hasRole("ADMIN")
 
-                        // ============================
-                        //  💬 CHATS (CLIENT/PROVIDER)
-                        // ============================
+
                         .requestMatchers(HttpMethod.GET, "/api/calls/chats")
                         .hasAnyRole("CLIENT", "PROVIDER", "ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/calls/my-chats/**")
                         .hasAnyRole("CLIENT", "PROVIDER", "ADMIN")
-                        // ============================
-                        //  📞 CALLS
-                        // ============================
+
                         .requestMatchers("/api/calls/me")
                         .hasAnyRole("CLIENT", "PROVIDER")
 
@@ -73,35 +71,28 @@ public class SecurityConfig {
 
                         .requestMatchers(HttpMethod.GET, "/api/calls/client/**")
                         .hasRole("CLIENT")
+                        .requestMatchers(HttpMethod.GET, "/api/calls/history").hasRole("PROVIDER")
 
                         .requestMatchers(HttpMethod.GET, "/api/calls/**")
                         .hasRole("ADMIN")
 
-                        // ============================
-                        //  CLIENTS
-                        // ============================
+
                         .requestMatchers("/api/clients/me").hasRole("CLIENT")
                         .requestMatchers("/api/clients/**").hasRole("ADMIN")
 
-                        // ============================
-                        //  FACILITIES
-                        // ============================
+
                         .requestMatchers(HttpMethod.GET, "/api/facilities/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/facilities/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/facilities/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/facilities/**").hasRole("ADMIN")
 
-                        // ============================
-                        //  FLAGS
-                        // ============================
+
                         .requestMatchers("/api/flags/me").hasAnyRole("PROVIDER", "CLIENT")
                         .requestMatchers(HttpMethod.GET, "/api/flags/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/flags/**").hasRole("CLIENT")
                         .requestMatchers(HttpMethod.DELETE, "/api/flags/**").hasAnyRole("ADMIN", "CLIENT")
 
-                        // ============================
-                        //  SHIFTS
-                        // ============================
+
                         .requestMatchers("/api/providers/shifts/me").hasRole("PROVIDER")
                         .requestMatchers(HttpMethod.POST, "/api/providers/shifts/**").hasRole("PROVIDER")
                         .requestMatchers(HttpMethod.GET, "/api/providers/shifts/**").authenticated()
@@ -109,16 +100,12 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.DELETE, "/api/providers/shifts/**").hasAnyRole("ADMIN", "PROVIDER")
                         .requestMatchers(HttpMethod.PUT, "/api/providers/*/calls/*/finish").hasRole("PROVIDER")
 
-                        // ============================
-                        //  PROVIDERS
-                        // ============================
+
                         .requestMatchers("/api/providers/me").hasRole("PROVIDER")
                         .requestMatchers(HttpMethod.GET, "/api/providers/**").authenticated()
                         .requestMatchers("/api/providers/**").hasRole("ADMIN")
 
-                                // ============================
-                                //  REVIEWS
-                                // ============================
+
                                 .requestMatchers(HttpMethod.GET, "/api/reviews/all").authenticated()
 
                                 .requestMatchers(HttpMethod.GET, "/api/reviews/my-reviews")
@@ -136,15 +123,11 @@ public class SecurityConfig {
                                 .requestMatchers(HttpMethod.DELETE, "/api/reviews/**")
                                 .hasAnyRole("ADMIN", "CLIENT")
 
-                                // ============================
-                        //  MESSAGES
-                        // ============================
+
                         .requestMatchers("/api/messages/**")
                         .hasAnyRole("CLIENT", "PROVIDER", "ADMIN")
 
-                        // ============================
-                        //  RESTO
-                        // ============================
+
                         .anyRequest().authenticated()
                 );
 

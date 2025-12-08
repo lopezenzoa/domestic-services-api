@@ -104,35 +104,63 @@ public class CallServiceImpl implements CallService {
         return mapper.toDtoList(calls);
     }
     @Override
-    public List<CallDTO> getHistoryForProvider(Long providerId, String state, String start, String end) {
+    public Page<CallDTO> getProviderHistory(
+            Long providerId,
+            String state,
+            LocalDate start,
+            LocalDate end,
+            int page,
+            int size
+    ) {
 
-        List<CallDTO> all = mapper.toDtoList(repository.findAllByProviderId(providerId));
+        // Validar que el provider exista
+        providerService.getById(providerId);
 
-        // FILTRO POR ESTADO
-        if (state != null && !state.isEmpty()) {
-            all = all.stream()
-                    .filter(c -> c.getState().equalsIgnoreCase(state))
-                    .toList();
+        Pageable pageable = PageRequest.of(
+                page,
+                size,
+                Sort.by(Sort.Direction.DESC, "date")
+        );
+
+        // Convertir estado String → Enum (si viene)
+        States stateEnum = null;
+        if (state != null && !state.isBlank()) {
+            stateEnum = States.valueOf(state); // tus estados son REQUESTING, PENDING, FINISHED, DECLINED
         }
 
-        // FILTRO POR FECHAS (correcto)
-        if (start != null && !start.isEmpty() && end != null && !end.isEmpty()) {
+        // Convertir fechas (si vienen)
+        LocalDateTime startDateTime = (start != null) ? start.atStartOfDay() : null;
+        LocalDateTime endDateTime = (end != null) ? end.atTime(23, 59, 59) : null;
 
-            LocalDate startDate = LocalDate.parse(start);
-            LocalDate endDate   = LocalDate.parse(end);
+        Page<Call> calls;
 
-            LocalDateTime desde = startDate.atStartOfDay();          // 00:00
-            LocalDateTime hasta = endDate.atTime(23, 59, 59);        // 23:59:59
+        // 1️⃣ SOLO ESTADO
+        if (stateEnum != null && startDateTime == null && endDateTime == null) {
+            calls = repository.findByProviderIdAndState(providerId, stateEnum, pageable);
+        }
+        // 2️⃣ SOLO FECHAS
+        else if (stateEnum == null && startDateTime != null && endDateTime != null) {
+            calls = repository.findByProviderIdAndDateBetween(providerId, startDateTime, endDateTime, pageable);
+        }
+        // 3️⃣ ESTADO + FECHAS
+        else if (stateEnum != null && startDateTime != null && endDateTime != null) {
+            calls = repository.findByProviderIdAndStateAndDateBetween(
+                    providerId, stateEnum, startDateTime, endDateTime, pageable
+            );
+        }
+        // 4️⃣ SIN FILTRO (o filtros incompletos) → lo de antes: todos los estados permitidos
+        else {
+            List<States> allowedStates = List.of(
+                    States.REQUESTING,
+                    States.PENDING,
+                    States.FINISHED,
+                    States.DECLINED
+            );
 
-            all = all.stream()
-                    .filter(c -> {
-                        LocalDateTime fecha = LocalDateTime.parse(c.getDate());
-                        return (!fecha.isBefore(desde) && !fecha.isAfter(hasta));
-                    })
-                    .toList();
+            calls = repository.findByProviderIdAndStateIn(providerId, allowedStates, pageable);
         }
 
-        return all;
+        return calls.map(mapper::toDto);
     }
 
 
@@ -261,25 +289,8 @@ public class CallServiceImpl implements CallService {
 
         return callOpt;
     }
-    @Override
-    public Page<CallDTO> getProviderHistory(Long providerId, int page, int size) {
-
-        List<States> allowedStates = List.of(
-                States.REQUESTING,
-                States.PENDING,
-                States.FINISHED,
-                States.DECLINED
-        );
 
 
-
-        Pageable pageable = PageRequest.of(page, size);
-
-        Page<Call> calls = repository.findByProviderIdAndStateIn(providerId, allowedStates, pageable);
-
-        return calls.map(mapper::toDto);
-
-    }
     @Override
     public List<ChatListDTO> getMyChats() {
         UserDTO me = userService.getMe().orElseThrow();

@@ -17,12 +17,14 @@ import jakarta.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.core.Authentication;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -155,16 +157,18 @@ public class CallController {
             @ApiResponse(responseCode = "403", description = "Access forbidden"),
             @ApiResponse(responseCode = "401", description = "Request not authenticated")
     })
-    @GetMapping("/provider/{id}/history")
-    public ResponseEntity<Page<CallDTO>> getProviderHistoryPaginated(
-            @PathVariable Long id,
+
+    @GetMapping("/history")
+    public Page<CallDTO> getProviderHistory(
+            @RequestParam Long providerId,
+            @RequestParam(required = false) String state,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate start,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
+            @RequestParam(defaultValue = "5") int size
     ) {
-        return ResponseEntity.ok(service.getProviderHistory(id, page, size));
+        return service.getProviderHistory(providerId, state, start, end, page, size);
     }
-
-
 
     @PutMapping("/provider/{providerId}/accept/{callId}")
     public ResponseEntity<Void> acceptCall(
@@ -269,16 +273,7 @@ public class CallController {
     public ResponseEntity<List<CallDTO>> getMe() {
         return ResponseEntity.ok(service.getMe());
     }
-    @GetMapping("/provider/history")
-    public ResponseEntity<List<CallDTO>> getHistory(
-            @RequestParam Long providerId,
-            @RequestParam(required = false) String state,
-            @RequestParam(required = false) String start,
-            @RequestParam(required = false) String end
-    ) {
-        List<CallDTO> response = service.getHistoryForProvider(providerId, state, start, end);
-        return ResponseEntity.ok(response);
-    }
+
     @GetMapping("/client/call/{id}")
     public ResponseEntity<?> getCallForClient(@PathVariable Long id) {
 
