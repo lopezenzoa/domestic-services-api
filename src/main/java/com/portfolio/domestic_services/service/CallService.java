@@ -2,6 +2,7 @@ package com.portfolio.domestic_services.service;
 
 import com.portfolio.domestic_services.dto.CallDTO;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -13,7 +14,7 @@ public interface CallService {
     List<CallDTO> getAll();
     Optional<CallDTO> getProviderCallDetail(Long providerId, Long callId);
     boolean finish(Long providerId, Long callId);
-    List<CallDTO> getHistoryForProvider(Long providerId, String state, String start, String end);
+
     Call findById(Long id);
 
     List<CallDTO> getAllByClient(Long clientId);
@@ -23,7 +24,14 @@ public interface CallService {
     boolean decline(Long providerId, Long callId);
     boolean delete(Long id);
     Page<CallDTO> getPaginatedByProvider(Long providerId, int page, int size);
-    Page<CallDTO> getProviderHistory(Long providerId, int page, int size);
+    Page<CallDTO> getProviderHistory(
+            Long providerId,
+            String state,
+            LocalDate start,
+            LocalDate end,
+            int page,
+            int size
+    );
     List<ChatListDTO> getMyChats();
 
     List<CallDTO> getMe();

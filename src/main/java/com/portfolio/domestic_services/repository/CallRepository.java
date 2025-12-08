@@ -10,6 +10,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface CallRepository extends JpaRepository<Call, Long> {
@@ -51,5 +52,22 @@ public interface CallRepository extends JpaRepository<Call, Long> {
     ORDER BY c.date DESC
     """)
     List<ChatListDTO> findChatsByProviderId(@Param("providerId") Long providerId);
+
+    Page<Call> findByProviderIdAndState(Long providerId, States state, Pageable pageable);
+
+    Page<Call> findByProviderIdAndDateBetween(
+            Long providerId,
+            LocalDateTime start,
+            LocalDateTime end,
+            Pageable pageable
+    );
+
+    Page<Call> findByProviderIdAndStateAndDateBetween(
+            Long providerId,
+            States state,
+            LocalDateTime start,
+            LocalDateTime end,
+            Pageable pageable
+    );
 }
 

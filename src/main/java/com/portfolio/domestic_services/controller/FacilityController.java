@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -32,12 +33,12 @@ public class FacilityController {
     })
     @PostMapping("/create")
     public ResponseEntity<FacilityDTO> create(
-            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Facility data needed to create")
-            @RequestBody FacilityDTO body
+            @Valid @RequestBody FacilityDTO body
     ) {
         Optional<FacilityDTO> response = service.create(body);
         return response.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.badRequest().build());
     }
+
 
     @Operation(
             summary = "Get a full list of facilities",
@@ -121,12 +122,12 @@ public class FacilityController {
     })
     @PutMapping("/update")
     public ResponseEntity<FacilityDTO> update(
-            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Facility data needed to update")
-            @RequestBody FacilityDTO body
+            @Valid @RequestBody FacilityDTO body
     ) throws UniquenessViolationException {
         Optional<FacilityDTO> facilityOpt = service.update(body);
         return facilityOpt.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.badRequest().build());
     }
+
 
     @Operation(summary = "Delete a specific Facility")
     @ApiResponses({
