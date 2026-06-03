@@ -14,20 +14,19 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "shifts")
-// This "Shift" entity is meant to be the disposability of a provider
 public class Shift {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "shift_id", nullable = false)
     private Long id;
 
-    @Column(name = "date", columnDefinition = "DATETIME", nullable = false)
-    private LocalDateTime dateTime;
+    @Column(nullable = false)
+    private LocalDateTime date;
 
-    @Column(columnDefinition = "TINYINT(1)", nullable = false)
+    @Column(nullable = false)
     private Boolean available;
 
     @ManyToOne
-    @JoinColumn(name = "provider_id")
+    @JoinColumn(name = "provider_id", nullable = false)
     private Provider provider;
 }

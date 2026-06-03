@@ -24,15 +24,27 @@ public class Provider extends User {
     private String licenseNumber;
 
     @ManyToOne
-    @JoinColumn(name = "facility_id")
+    @JoinColumn(name = "facility_id", nullable = false)
     private Facility facility;
 
-    @OneToMany(mappedBy = "provider", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(
+            mappedBy = "provider",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
     private List<Shift> shifts;
 
-    @OneToMany(mappedBy = "provider", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(
+            mappedBy = "provider",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
     private List<Call> calls;
 
-    @OneToMany(mappedBy = "provider", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Review> reviews;
+    @OneToMany(
+            mappedBy = "provider",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    private List<Flag> flags;
 }

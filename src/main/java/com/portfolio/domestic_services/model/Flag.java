@@ -17,20 +17,20 @@ import java.time.LocalDateTime;
 public class Flag {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "flag_id")
+    @Column(name = "flag_id", nullable = false)
     private Long id;
 
-    @Column
+    @Column(nullable = false)
     private String reason;
 
-    @Column(name = "report_date", columnDefinition = "DATETIME", nullable = false)
-    private LocalDateTime reportDate;
+    @Column(nullable = false)
+    private LocalDateTime timestamp;
 
     @ManyToOne
-    @JoinColumn(name = "client_id")
+    @JoinColumn(name = "client_id", nullable = false)
     private Client client;
 
     @ManyToOne
-    @JoinColumn(name = "provider_id")
+    @JoinColumn(name = "provider_id", nullable = false)
     private Provider provider;
 }

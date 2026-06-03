@@ -1,5 +1,6 @@
 package com.portfolio.domestic_services.model;
 
+import com.portfolio.domestic_services.model.enums.Role;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -19,19 +20,19 @@ public class User {
     @Column(name = "user_id", nullable = false)
     private Long id;
 
-    @Column(name = "first_name", nullable = false, length = 20)
+    @Column(name = "first_name", nullable = false)
     private String firstName;
 
-    @Column(name = "last_name", nullable = false, length = 20)
+    @Column(name = "last_name", nullable = false)
     private String lastName;
 
-    @Column(nullable = false, length = 40)
+    @Column(nullable = false)
     private String address;
 
-    @Column(name = "phone_number", nullable = false, length = 40, unique = true)
+    @Column(name = "phone_number", nullable = false, unique = true)
     private String phoneNumber;
 
-    @Column(nullable = false, length = 40, unique = true)
+    @Column(nullable = false, unique = true)
     private String email;
 
     @Column(unique = true, nullable = false)
@@ -42,5 +43,5 @@ public class User {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private Roles role;
+    private Role role;
 }

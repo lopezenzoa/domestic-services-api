@@ -1,5 +1,6 @@
 package com.portfolio.domestic_services.model;
 
+import com.portfolio.domestic_services.model.enums.Status;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -18,30 +19,27 @@ public class Call {
     @Column(name = "call_id", nullable = false)
     private Long id;
 
-    @Column
+    @Column(nullable = false)
     private String description;
 
-    @Column(columnDefinition = "DATETIME", nullable = false)
+    @Column(nullable = false)
     private LocalDateTime date;
 
-    @Column(length = 40, nullable = false)
+    @Column(nullable = false)
     private String address;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private States state;
+    private Status status;
 
-    @Column
+    @Column(nullable = false)
     private Double cost;
 
-    @Column
-    private String review;
-
     @ManyToOne
-    @JoinColumn(name = "client_id")
+    @JoinColumn(name = "client_id", nullable = false)
     private Client client;
 
     @ManyToOne
-    @JoinColumn(name = "provider_id")
+    @JoinColumn(name = "provider_id", nullable = false)
     private Provider provider;
 }

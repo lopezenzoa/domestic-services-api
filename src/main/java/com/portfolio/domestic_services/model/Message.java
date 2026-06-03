@@ -1,28 +1,36 @@
 package com.portfolio.domestic_services.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
 
 import java.time.LocalDateTime;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Table(name = "messages")
 @Entity
-@Data
 public class Message {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "message_id", nullable = false)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "call_id")
-    @JsonIgnore
-    private Call call;
-    private Long authorId;
-    private String authorRole;
+    @Column(nullable = false)
     private String content;
-    private LocalDateTime timestamp;
-    private boolean seen = false;
-    public boolean isSeen() { return seen; }
-    public void setSeen(boolean seen) { this.seen = seen; }
 
+    @Column(nullable = false)
+    private LocalDateTime timestamp;
+
+    @Column(nullable = false)
+    private Boolean seen;
+
+    @ManyToOne
+    @JoinColumn(name = "call_id", nullable = false)
+    private Call call;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 }

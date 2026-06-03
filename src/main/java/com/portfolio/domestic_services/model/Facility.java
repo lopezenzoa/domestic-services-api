@@ -1,6 +1,5 @@
 package com.portfolio.domestic_services.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -15,23 +14,19 @@ import java.util.List;
 @AllArgsConstructor
 @Table(name = "facilities")
 @Entity
-// This "Facility" entity is meant to be the service that is provided by the provider
 public class Facility {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "facility_id", nullable = false)
     private Long id;
 
-    @Column(length = 30, nullable = false, unique = true)
+    @Column(nullable = false, unique = true)
     private String name;
-
-    @Column(length = 100)
-    private String description;
 
     @OneToMany(
             mappedBy = "facility",
             cascade = CascadeType.ALL,
             orphanRemoval = true
     )
-    @JsonIgnore
     private List<Provider> providers;
 }
