@@ -27,6 +27,6 @@ public class Shift {
     private Boolean available;
 
     @ManyToOne
-    @JoinColumn(name = "provider_id", nullable = false)
-    private Provider provider;
+    @JoinColumn(name = "user_id", nullable = false)
+    private User provider;
 }

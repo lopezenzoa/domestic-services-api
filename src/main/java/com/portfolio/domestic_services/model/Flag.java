@@ -27,10 +27,10 @@ public class Flag {
     private LocalDateTime timestamp;
 
     @ManyToOne
-    @JoinColumn(name = "client_id", nullable = false)
-    private Client client;
+    @JoinColumn(name = "user_id", nullable = false)
+    private User client;
 
     @ManyToOne
-    @JoinColumn(name = "provider_id", nullable = false)
-    private Provider provider;
+    @JoinColumn(name = "user_id", nullable = false)
+    private User provider;
 }

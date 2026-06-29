@@ -1,11 +1,13 @@
 package com.portfolio.domestic_services.model;
 
-import com.portfolio.domestic_services.model.enums.Role;
+import com.portfolio.domestic_services.shared.enums.Role;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.util.List;
 
 @Getter
 @Setter
@@ -41,7 +43,35 @@ public class User {
     @Column(nullable = false)
     private String password;
 
+    @Column(name = "license_number", unique = true)
+    private String licenseNumber;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role role;
+
+    @ManyToOne
+    @JoinColumn(name = "facility_id")
+    private Facility facility;
+
+    @OneToMany(
+            mappedBy = "client",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    private List<Call> calls;
+
+    @OneToMany(
+            mappedBy = "client",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    private List<Flag> flags;
+
+    @OneToMany(
+            mappedBy = "provider",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    private List<Shift> shifts;
 }

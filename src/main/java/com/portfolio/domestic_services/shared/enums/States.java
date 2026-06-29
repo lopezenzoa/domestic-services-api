@@ -1,4 +1,4 @@
-package com.portfolio.domestic_services.model;
+package com.portfolio.domestic_services.shared.enums;
 
 public enum States {
     // REQUESTING: the call was not confirmed yet by the provider

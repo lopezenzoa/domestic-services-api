@@ -1,9 +1,8 @@
 package com.portfolio.domestic_services.repository;
 
-import com.portfolio.domestic_services.dto.CallDTO;
 import com.portfolio.domestic_services.dto.ChatListDTO;
 import com.portfolio.domestic_services.model.Call;
-import com.portfolio.domestic_services.model.States;
+import com.portfolio.domestic_services.shared.enums.States;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

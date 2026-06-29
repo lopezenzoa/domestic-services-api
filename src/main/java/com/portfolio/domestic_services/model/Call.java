@@ -1,6 +1,6 @@
 package com.portfolio.domestic_services.model;
 
-import com.portfolio.domestic_services.model.enums.Status;
+import com.portfolio.domestic_services.shared.enums.Status;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -36,10 +36,10 @@ public class Call {
     private Double cost;
 
     @ManyToOne
-    @JoinColumn(name = "client_id", nullable = false)
-    private Client client;
+    @JoinColumn(name = "user_id", nullable = false)
+    private User client;
 
     @ManyToOne
-    @JoinColumn(name = "provider_id", nullable = false)
-    private Provider provider;
+    @JoinColumn(name = "user_id", nullable = false)
+    private User provider;
 }

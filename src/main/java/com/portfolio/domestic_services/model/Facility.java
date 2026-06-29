@@ -28,5 +28,5 @@ public class Facility {
             cascade = CascadeType.ALL,
             orphanRemoval = true
     )
-    private List<Provider> providers;
+    private List<User> providers;
 }
